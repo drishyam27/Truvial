@@ -50,7 +50,7 @@ export default function Navbar() {
         </Link>
 
         {/* Absolute Burger Menu positioned exactly below the navbar border on the left */}
-        <div className="absolute left-6 top-[68px] z-50 hidden md:block">
+        <div className="absolute left-16 top-[68px] z-50 hidden md:block">
           <label className="buttons__burger" htmlFor="burger">
             <input
               type="checkbox"
