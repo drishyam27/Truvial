@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Providers from './providers';
 import Navbar from '../components/Navbar';
-import Preloader from '../components/Preloader';
 
 export const metadata: Metadata = {
   title: 'Truvial - Transparent Charity Fund Distribution System',
@@ -18,7 +17,6 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <body className="flex min-h-screen flex-col bg-canvas font-sans antialiased text-body-text">
         <Providers>
-          <Preloader />
           <Navbar />
           <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8">
             {children}
