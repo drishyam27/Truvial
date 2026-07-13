@@ -78,60 +78,66 @@ export default function Navbar() {
             </Link>
           )}
 
-          {isConnected ? (
-            <div className="relative flex items-center space-x-2">
-              {/* Role badge */}
-              <span className="flex items-center space-x-1 rounded-md bg-surface-card px-2.5 py-1 text-xs border border-hairline font-sans font-medium text-body-text">
-                {userRole === 'admin' && <Shield className="mr-1 h-3.5 w-3.5 text-accent-red" />}
-                {userRole === 'beneficiary' && <Award className="mr-1 h-3.5 w-3.5 text-accent-green" />}
-                {userRole === 'donor' && <User className="mr-1 h-3.5 w-3.5 text-accent-blue" />}
-                {userRole.toUpperCase()}
-              </span>
-
-              {/* Account Dropdown Trigger */}
-              <button
-                onClick={disconnect}
-                className="flex h-9 items-center justify-center rounded-md border border-hairline-strong bg-surface-elevated px-4 font-sans text-xs font-medium text-ink transition-colors hover:bg-surface-card"
-              >
-                {publicKey?.slice(0, 6)}...{publicKey?.slice(-4)}
-              </button>
-            </div>
-          ) : (
-            <div className="relative">
-              <button
-                onClick={() => setRoleSelectOpen(!roleSelectOpen)}
-                className="flex h-9 items-center justify-center rounded-md bg-primary-white px-4 font-sans text-xs font-semibold text-primary-on transition-all hover:bg-white/95"
-              >
-                Connect Wallet
-              </button>
-
-              {roleSelectOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-lg border border-hairline-strong bg-surface-elevated p-1 shadow-2xl">
-                  <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-mute">
-                    Select Test Profile
-                  </div>
-                  <button
-                    onClick={() => handleConnect('donor')}
-                    className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-medium text-body-text rounded hover:bg-surface-card hover:text-ink"
-                  >
-                    Donor Profile
-                  </button>
-                  <button
-                    onClick={() => handleConnect('admin')}
-                    className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-medium text-body-text rounded hover:bg-surface-card hover:text-ink"
-                  >
-                    Charity Admin
-                  </button>
-                  <button
-                    onClick={() => handleConnect('beneficiary')}
-                    className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-medium text-body-text rounded hover:bg-surface-card hover:text-ink"
-                  >
-                    Beneficiary
-                  </button>
-                </div>
-              )}
-            </div>
+          {isConnected && (
+            <span className="flex items-center space-x-1 rounded-full bg-surface-card px-2.5 py-1 text-[11px] border border-hairline font-sans font-medium text-body-text">
+              {userRole === 'admin' && <Shield className="mr-1 h-3 w-3 text-accent-red" />}
+              {userRole === 'beneficiary' && <Award className="mr-1 h-3 w-3 text-accent-green" />}
+              {userRole === 'donor' && <User className="mr-1 h-3 w-3 text-accent-blue" />}
+              {userRole.toUpperCase()}
+            </span>
           )}
+
+          <div className="relative flex items-center space-x-3 bg-surface-card border border-hairline rounded-full pl-3.5 pr-2 py-1">
+            <span className="font-sans text-xs font-semibold text-body-text select-none">
+              {isConnected ? (
+                <span className="flex items-center">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent-green mr-2 animate-pulse" />
+                  {publicKey?.slice(0, 6)}...{publicKey?.slice(-4)}
+                </span>
+              ) : (
+                "Connect Wallet"
+              )}
+            </span>
+            <input
+              type="checkbox"
+              role="switch"
+              className="liquid-3"
+              checked={isConnected}
+              onChange={() => {
+                if (isConnected) {
+                  disconnect();
+                } else {
+                  setRoleSelectOpen(!roleSelectOpen);
+                }
+              }}
+            />
+
+            {roleSelectOpen && !isConnected && (
+              <div className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-hairline-strong bg-surface-elevated p-1 shadow-2xl z-50">
+                <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-mute">
+                  Select Test Profile
+                </div>
+                <button
+                  onClick={() => handleConnect('donor')}
+                  className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-medium text-body-text rounded hover:bg-surface-card hover:text-ink"
+                >
+                  Donor Profile
+                </button>
+                <button
+                  onClick={() => handleConnect('admin')}
+                  className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-medium text-body-text rounded hover:bg-surface-card hover:text-ink"
+                >
+                  Charity Admin
+                </button>
+                <button
+                  onClick={() => handleConnect('beneficiary')}
+                  className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-medium text-body-text rounded hover:bg-surface-card hover:text-ink"
+                >
+                  Beneficiary
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Mobile menu button */}
