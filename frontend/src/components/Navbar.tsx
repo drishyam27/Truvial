@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useWalletStore } from '../state/wallet';
 import { useTxStore } from '../state/tx';
 import { StellarService } from '../services/stellar';
-import { Wallet, Menu, X, Shield, Award, User, RefreshCw } from 'lucide-react';
+import { Wallet, Menu, X, Shield, Award, User, RefreshCw, Copy, Check } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -14,6 +14,7 @@ export default function Navbar() {
   const { transactions } = useTxStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roleSelectOpen, setRoleSelectOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const pendingCount = transactions.filter((t) => t.status === 'pending' || t.status === 'processing').length;
 
@@ -98,6 +99,27 @@ export default function Navbar() {
                 "Connect Wallet"
               )}
             </span>
+
+            {isConnected && (
+              <button
+                onClick={async () => {
+                  if (publicKey) {
+                    await navigator.clipboard.writeText(publicKey);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1500);
+                  }
+                }}
+                className="flex items-center justify-center p-1 rounded-full text-mute hover:text-ink hover:bg-surface-elevated transition-all"
+                title="Copy Address"
+              >
+                {copied ? (
+                  <Check className="h-3.5 w-3.5 text-accent-green" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
+              </button>
+            )}
+
             <input
               type="checkbox"
               role="switch"
