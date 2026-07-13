@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Geist+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-canvas: #000000;
+  --color-surface-card: #0a0a0c;
+  --color-surface-elevated: #101012;
+  --color-surface-deep: #06060a;
+  
+  --color-primary-white: #fcfdff;
+  --color-primary-on: #000000;
+  --color-ink: #fcfdff;
+  --color-body-text: rgba(252,253,255,0.86);
+  --color-charcoal: rgba(252,253,255,0.7);
+  --color-mute: #a1a4a5;
+  --color-ash: #888e90;
+  --color-stone: #464a4d;
+  
+  --color-accent-orange: #ff801f;
+  --color-accent-orange-glow: rgba(255,89,0,0.22);
+  --color-accent-yellow: #ffc53d;
+  --color-accent-blue: #3b9eff;
+  --color-accent-blue-glow: rgba(0,117,255,0.34);
+  --color-accent-green: #11ff99;
+  --color-accent-green-glow: rgba(34,255,153,0.18);
+  --color-accent-red: #ff2047;
+  --color-accent-red-glow: rgba(255,32,71,0.34);
+  
+  --color-hairline: rgba(255,255,255,0.06);
+  --color-hairline-strong: rgba(255,255,255,0.14);
+  --color-divider-soft: rgba(255,255,255,0.04);
+  
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-favorit: "Inter Tight", "ABC Favorit", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "Geist Mono", monospace;
+  
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+  --radius-xs: 4px;
+}
+
+:root {
+  --background: #000000;
+  --foreground: #fcfdff;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Custom glow utility */
+.glow-orange {
+  background: radial-gradient(circle at top, rgba(255,89,0,0.12) 0%, rgba(0,0,0,0) 70%);
+}
+
+.glow-blue {
+  background: radial-gradient(circle at top, rgba(0,117,255,0.15) 0%, rgba(0,0,0,0) 70%);
+}
+
+.glow-green {
+  background: radial-gradient(circle at top, rgba(34,255,153,0.08) 0%, rgba(0,0,0,0) 70%);
+}
+
+.glow-red {
+  background: radial-gradient(circle at top, rgba(255,32,71,0.15) 0%, rgba(0,0,0,0) 70%);
+}
+
+/* Custom scrollbar for Resend theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
