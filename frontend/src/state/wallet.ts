@@ -12,14 +12,12 @@ export interface WalletState {
   isConnected: boolean;
   network: WalletNetwork;
   balance: string;
-  isMockMode: boolean;
   userRole: 'admin' | 'donor' | 'beneficiary' | 'none';
   
   // Actions
   connect: (publicKey: string, role?: 'admin' | 'donor' | 'beneficiary') => void;
   disconnect: () => void;
   setNetwork: (network: WalletNetwork) => void;
-  setMockMode: (isMock: boolean) => void;
   setRole: (role: 'admin' | 'donor' | 'beneficiary' | 'none') => void;
   updateBalance: (balance: string) => void;
 }
@@ -29,7 +27,6 @@ export const useWalletStore = create<WalletState>((set) => ({
   isConnected: false,
   network: WalletNetwork.TESTNET,
   balance: '0.00',
-  isMockMode: true, // Default to true to allow immediate dashboard experience without setup
   userRole: 'none',
 
   connect: (publicKey, role = 'donor') => set({
@@ -45,7 +42,6 @@ export const useWalletStore = create<WalletState>((set) => ({
     balance: '0.00'
   }),
   setNetwork: (network) => set({ network }),
-  setMockMode: (isMockMode) => set({ isMockMode }),
   setRole: (userRole) => set({ 
     userRole,
     balance: userRole === 'admin' ? '12500.50' : userRole === 'donor' ? '850.25' : '150.00'

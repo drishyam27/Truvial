@@ -9,7 +9,6 @@ describe('useWalletStore unit tests', () => {
       isConnected: false,
       network: WalletNetwork.TESTNET,
       balance: '0.00',
-      isMockMode: true,
       userRole: 'none'
     });
   });
@@ -18,7 +17,6 @@ describe('useWalletStore unit tests', () => {
     const state = useWalletStore.getState();
     expect(state.isConnected).toBe(false);
     expect(state.publicKey).toBeNull();
-    expect(state.isMockMode).toBe(true);
     expect(state.userRole).toBe('none');
     expect(state.balance).toBe('0.00');
   });
@@ -53,12 +51,10 @@ describe('useWalletStore unit tests', () => {
     expect(state.balance).toBe('0.00');
   });
 
-  it('should change mock mode and network configs', () => {
-    useWalletStore.getState().setMockMode(false);
+  it('should change network configs', () => {
     useWalletStore.getState().setNetwork(WalletNetwork.PUBLIC);
     
     const state = useWalletStore.getState();
-    expect(state.isMockMode).toBe(false);
     expect(state.network).toBe(WalletNetwork.PUBLIC);
   });
 });

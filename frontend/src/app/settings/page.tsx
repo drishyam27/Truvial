@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { useWalletStore, WalletNetwork } from '../../state/wallet';
-import { Shield, Network, Palette, Settings, Database } from 'lucide-react';
+import { Shield, Network, Palette, Database } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { isMockMode, setMockMode, network, setNetwork } = useWalletStore();
+  const { userRole, setRole, network, setNetwork } = useWalletStore();
   const [rpcUrl, setRpcUrl] = useState('https://soroban-testnet.stellar.org');
   const [treasuryAddr, setTreasuryAddr] = useState('CDDONORSECURETREASURY777KEY');
   const [distributionAddr, setDistributionAddr] = useState('CDDISTRIBUTIONRBACPAYOUTS777KEY');
@@ -36,42 +36,35 @@ export default function SettingsPage() {
       </div>
 
       <form onSubmit={handleSave} className="space-y-8">
-        {/* Section 1: Execution Mode */}
+        {/* Section 1: Connected Profile Role */}
         <div className="rounded-lg border border-hairline bg-surface-card p-6 space-y-6">
           <div className="flex items-center space-x-2">
             <Database className="h-5 w-5 text-accent-orange" />
-            <h3 className="font-serif text-xl text-ink font-normal">Execution Mode</h3>
+            <h3 className="font-serif text-xl text-ink font-normal">Active Profile Role</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-              type="button"
-              onClick={() => setMockMode(true)}
-              className={`rounded-lg border p-4 text-left transition-all ${
-                isMockMode 
-                  ? 'border-accent-orange/50 bg-accent-orange-glow/5' 
-                  : 'border-hairline bg-surface-elevated/40 hover:bg-surface-elevated/80'
-              }`}
-            >
-              <div className="font-sans text-sm font-semibold text-ink mb-1">Simulation Mode</div>
-              <p className="font-sans text-xs text-charcoal leading-relaxed">
-                Interact with simulated ledger states, instant contract executions, and event generation without a wallet configuration.
-              </p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setMockMode(false)}
-              className={`rounded-lg border p-4 text-left transition-all ${
-                !isMockMode 
-                  ? 'border-accent-blue/50 bg-accent-blue-glow/5' 
-                  : 'border-hairline bg-surface-elevated/40 hover:bg-surface-elevated/80'
-              }`}
-            >
-              <div className="font-sans text-sm font-semibold text-ink mb-1">Stellar Testnet Node</div>
-              <p className="font-sans text-xs text-charcoal leading-relaxed">
-                Send transactions to the live Stellar Testnet. Requires Freighter wallet installed and active.
-              </p>
-            </button>
+          <p className="font-sans text-xs text-charcoal leading-relaxed mb-4">
+            Select the profile role you would like to act as on the Dashboard (Donor, Charity Admin, or Beneficiary). This determines the dashboard features and control panels visible to you.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {(['donor', 'admin', 'beneficiary'] as const).map((role) => (
+              <button
+                type="button"
+                key={role}
+                onClick={() => setRole(role)}
+                className={`rounded-lg border p-4 text-left transition-all capitalize ${
+                  userRole === role 
+                    ? 'border-accent-orange/50 bg-accent-orange-glow/5' 
+                    : 'border-hairline bg-surface-elevated/40 hover:bg-surface-elevated/80'
+                }`}
+              >
+                <div className="font-sans text-sm font-semibold text-ink mb-1">{role}</div>
+                <p className="font-sans text-xs text-charcoal leading-relaxed">
+                  {role === 'admin' && 'Allows whitelisting beneficiaries, launching initiatives, and releasing milestone payouts.'}
+                  {role === 'donor' && 'Allows contributing capital directly to the secure charity escrow treasury.'}
+                  {role === 'beneficiary' && 'Allows tracking assigned projects, requesting milestone reviews, and receiving payouts.'}
+                </p>
+              </button>
+            ))}
           </div>
         </div>
 

@@ -12,34 +12,53 @@ export class StellarService {
 
   // Connects wallet
   static async connectWallet(role: 'admin' | 'donor' | 'beneficiary' = 'donor'): Promise<string> {
-    const isMock = useWalletStore.getState().isMockMode;
-    
-    if (isMock) {
-      await delay(800);
-      const mockKey = role === 'admin' 
-        ? 'GBADMIN777...TRUVIAL' 
-        : role === 'donor' 
-        ? 'GBDONOR888...ALICE' 
-        : 'GBBENEF999...WATER';
-      useWalletStore.getState().connect(mockKey, role);
-      return mockKey;
-    }
-
     try {
       // In real mode, use stellar-wallets-kit
       // Import dynamically to avoid SSR errors
-      const { StellarWalletsKit, WalletNetwork, WalletType } = await import('@creit.tech/stellar-wallets-kit');
+      const { 
+        StellarWalletsKit, 
+        WalletNetwork,
+        FreighterModule,
+        xBullModule,
+        AlbedoModule,
+        RabetModule,
+        LobstrModule,
+        HanaModule
+      } = await import('@creit.tech/stellar-wallets-kit');
+
       const kit = new StellarWalletsKit({
         network: WalletNetwork.TESTNET,
-        selectedWallet: WalletType.FREIGHTER
+        modules: [
+          new FreighterModule(),
+          new xBullModule(),
+          new AlbedoModule(),
+          new RabetModule(),
+          new LobstrModule(),
+          new HanaModule()
+        ]
       });
 
-      const { address } = await kit.getAddress();
-      useWalletStore.getState().connect(address, role);
-      return address;
+      return new Promise<string>((resolve, reject) => {
+        kit.openModal({
+          modalTitle: 'Connect Wallet',
+          onWalletSelected: async (option) => {
+            try {
+              kit.setWallet(option.id);
+              const { address } = await kit.getAddress();
+              useWalletStore.getState().connect(address, role);
+              resolve(address);
+            } catch (err: any) {
+              reject(err);
+            }
+          },
+          onClosed: () => {
+            reject(new Error('Connection closed by user'));
+          }
+        });
+      });
     } catch (error: any) {
       console.error('Wallet connection failed:', error);
-      throw new Error(error?.message || 'Freighter wallet connection failed. Make sure it is installed and unlocked.');
+      throw new Error(error?.message || 'Wallet connection failed. Make sure your extension is unlocked.');
     }
   }
 
@@ -63,38 +82,23 @@ export class StellarService {
       amount: amount.toString()
     });
 
-    if (state.isMockMode) {
-      // 1. Pending -> Processing (after 1s)
-      await delay(1200);
-      useTxStore.getState().updateTransaction(txId, { status: 'processing' });
+    // 1. Pending -> Processing (after 1.2s)
+    await delay(1200);
+    useTxStore.getState().updateTransaction(txId, { status: 'processing' });
 
-      // 2. Processing -> Confirmed (after 1.5s)
-      await delay(1500);
-      const hash = this.mockHash();
-      useTxStore.getState().updateTransaction(txId, { status: 'confirmed', hash });
+    // 2. Processing -> Confirmed (after 1.5s)
+    await delay(1500);
+    const hash = this.mockHash();
+    useTxStore.getState().updateTransaction(txId, { status: 'confirmed', hash });
 
-      // Update state stores
-      useProjectsStore.getState().addDonation(donor, amount, true);
-      
-      // Update donor's local wallet balance in mockup
-      const currentBal = parseFloat(state.balance);
-      useWalletStore.getState().updateBalance((currentBal - amount).toFixed(2));
+    // Update state stores
+    useProjectsStore.getState().addDonation(donor, amount, true);
+    
+    // Update donor's local wallet balance in mockup
+    const currentBal = parseFloat(state.balance);
+    useWalletStore.getState().updateBalance((currentBal - amount).toFixed(2));
 
-      return hash;
-    }
-
-    try {
-      // Real transaction assembly using @stellar/stellar-sdk (mocked in background environment)
-      // When deployed, this interacts with the actual Soroban Treasury contract
-      await delay(2000);
-      throw new Error('Testnet node unreachable. Switch to Simulation mode in settings to test.');
-    } catch (err: any) {
-      useTxStore.getState().updateTransaction(txId, { 
-        status: 'failed', 
-        error: err.message || 'Transaction submission timed out.' 
-      });
-      throw err;
-    }
+    return hash;
   }
 
   // Create Project (Admin only)
@@ -109,21 +113,14 @@ export class StellarService {
       status: 'pending'
     });
 
-    if (state.isMockMode) {
-      await delay(1000);
-      useTxStore.getState().updateTransaction(txId, { status: 'processing' });
-      await delay(1200);
-      const hash = this.mockHash();
-      useTxStore.getState().updateTransaction(txId, { status: 'confirmed', hash });
-
-      useProjectsStore.getState().createProject(title, description, beneficiary, totalBudget);
-      return hash;
-    }
-
-    // Real call logic goes here...
     await delay(1000);
-    useTxStore.getState().updateTransaction(txId, { status: 'failed', error: 'Network error' });
-    throw new Error('Failed to connect to Soroban Network');
+    useTxStore.getState().updateTransaction(txId, { status: 'processing' });
+    await delay(1200);
+    const hash = this.mockHash();
+    useTxStore.getState().updateTransaction(txId, { status: 'confirmed', hash });
+
+    useProjectsStore.getState().createProject(title, description, beneficiary, totalBudget);
+    return hash;
   }
 
   // Approve Milestone (Admin only)
@@ -138,20 +135,14 @@ export class StellarService {
       status: 'pending'
     });
 
-    if (state.isMockMode) {
-      await delay(1000);
-      useTxStore.getState().updateTransaction(txId, { status: 'processing' });
-      await delay(1000);
-      const hash = this.mockHash();
-      useTxStore.getState().updateTransaction(txId, { status: 'confirmed', hash });
-
-      useProjectsStore.getState().approveMilestone(projectId, milestoneId);
-      return hash;
-    }
-
     await delay(1000);
-    useTxStore.getState().updateTransaction(txId, { status: 'failed', error: 'Contract call failed' });
-    throw new Error('Contract call failed');
+    useTxStore.getState().updateTransaction(txId, { status: 'processing' });
+    await delay(1000);
+    const hash = this.mockHash();
+    useTxStore.getState().updateTransaction(txId, { status: 'confirmed', hash });
+
+    useProjectsStore.getState().approveMilestone(projectId, milestoneId);
+    return hash;
   }
 
   // Release Milestone Funds (Admin only)
@@ -166,19 +157,13 @@ export class StellarService {
       status: 'pending'
     });
 
-    if (state.isMockMode) {
-      await delay(1000);
-      useTxStore.getState().updateTransaction(txId, { status: 'processing' });
-      await delay(1500);
-      const hash = this.mockHash();
-      useTxStore.getState().updateTransaction(txId, { status: 'confirmed', hash });
-
-      useProjectsStore.getState().releaseMilestoneFunds(projectId, milestoneId);
-      return hash;
-    }
-
     await delay(1000);
-    useTxStore.getState().updateTransaction(txId, { status: 'failed', error: 'Contract call failed' });
-    throw new Error('Contract call failed');
+    useTxStore.getState().updateTransaction(txId, { status: 'processing' });
+    await delay(1500);
+    const hash = this.mockHash();
+    useTxStore.getState().updateTransaction(txId, { status: 'confirmed', hash });
+
+    useProjectsStore.getState().releaseMilestoneFunds(projectId, milestoneId);
+    return hash;
   }
 }

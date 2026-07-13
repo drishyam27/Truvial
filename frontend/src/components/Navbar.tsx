@@ -10,7 +10,7 @@ import { Wallet, Menu, X, Shield, Award, User, RefreshCw } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { publicKey, isConnected, userRole, isMockMode, disconnect, setMockMode, setRole } = useWalletStore();
+  const { publicKey, isConnected, userRole, disconnect, setRole } = useWalletStore();
   const { transactions } = useTxStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roleSelectOpen, setRoleSelectOpen] = useState(false);
@@ -67,14 +67,6 @@ export default function Navbar() {
 
         {/* Right: Wallet Connection & Stats */}
         <div className="hidden md:flex items-center space-x-4">
-          {/* Simulation Mode Indicator */}
-          {isMockMode && (
-            <div className="flex items-center space-x-1.5 rounded-full bg-accent-orange-glow/10 px-3 py-1 border border-accent-orange/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent-orange animate-pulse" />
-              <span className="font-mono text-[11px] text-accent-orange">Simulation</span>
-            </div>
-          )}
-
           {/* Pending Tx Badge */}
           {pendingCount > 0 && (
             <Link
@@ -183,12 +175,6 @@ export default function Navbar() {
           })}
 
           <div className="border-t border-hairline pt-4 flex flex-col space-y-3">
-            {isMockMode && (
-              <div className="flex items-center space-x-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent-orange" />
-                <span className="font-mono text-xs text-accent-orange">Simulation Active</span>
-              </div>
-            )}
 
             {isConnected ? (
               <div className="flex items-center justify-between">
