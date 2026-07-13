@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <body className="flex min-h-screen flex-col bg-canvas font-sans antialiased text-body-text">
+      <body className="flex min-h-screen flex-col bg-canvas font-sans antialiased text-body-text overflow-x-hidden">
         <Providers>
           <Navbar />
           <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-8">

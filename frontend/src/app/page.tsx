@@ -6,9 +6,9 @@ import { ArrowRight, Lock, CheckCircle, Eye, Code } from 'lucide-react';
 
 export default function LandingPage() {
   return (
-    <div className="relative overflow-hidden py-12 md:py-24">
+    <div className="relative py-12 md:py-24">
       {/* Background Radial Glow */}
-      <div className="absolute top-[-112px] left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] glow-orange pointer-events-none z-0" />
+      <div className="absolute top-[-96px] left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] glow-orange pointer-events-none z-0" />
 
       {/* Hero Section */}
       <div className="relative z-10 text-center max-w-4xl mx-auto flex flex-col items-center">

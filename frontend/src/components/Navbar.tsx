@@ -37,55 +37,54 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 h-20 w-full border-b border-hairline bg-canvas/30 backdrop-blur-md">
-      <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
-        {/* Left: Logo & Sub-Burger Menu */}
-        <div className="flex flex-col items-start justify-center space-y-1 py-1 h-full">
-          <Link href="/" className="flex items-center space-x-2 select-none">
-            <span className="font-serif text-2xl font-medium tracking-tight text-ink">
-              Truvial
-            </span>
-            <span className="rounded-full bg-surface-elevated px-2 py-0.5 font-mono text-[10px] text-mute border border-hairline">
-              v1.0
-            </span>
-          </Link>
+    <nav className="sticky top-0 z-50 h-16 w-full border-b border-hairline bg-canvas/30 backdrop-blur-md">
+      <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6 relative">
+        {/* Left: Logo */}
+        <Link href="/" className="flex items-center space-x-2 select-none">
+          <span className="font-serif text-2xl font-medium tracking-tight text-ink">
+            Truvial
+          </span>
+          <span className="rounded-full bg-surface-elevated px-2 py-0.5 font-mono text-[10px] text-mute border border-hairline">
+            v1.0
+          </span>
+        </Link>
 
-          <div className="relative flex items-center justify-center">
-            <label className="buttons__burger" htmlFor="burger">
-              <input
-                type="checkbox"
-                id="burger"
-                checked={menuDropdownOpen}
-                onChange={(e) => setMenuDropdownOpen(e.target.checked)}
-              />
-              <span></span>
-              <span></span>
-              <span></span>
-            </label>
+        {/* Absolute Burger Menu positioned exactly below the navbar border on the left */}
+        <div className="absolute left-6 top-[68px] z-50 hidden md:block">
+          <label className="buttons__burger" htmlFor="burger">
+            <input
+              type="checkbox"
+              id="burger"
+              checked={menuDropdownOpen}
+              onChange={(e) => setMenuDropdownOpen(e.target.checked)}
+            />
+            <span></span>
+            <span></span>
+            <span></span>
+          </label>
 
-            {menuDropdownOpen && (
-              <div className="absolute left-0 top-full mt-2 w-56 rounded-lg border border-hairline-strong bg-surface-elevated p-1 shadow-2xl z-50">
-                <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-mute border-b border-hairline mb-1 select-none">
-                  Menu
-                </div>
-                {navLinks.map((link) => {
-                  const active = pathname === link.href;
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMenuDropdownOpen(false)}
-                      className={`flex w-full items-center px-3 py-2 text-left font-sans text-xs font-semibold rounded hover:bg-surface-card hover:text-ink ${
-                        active ? 'text-ink bg-surface-card/50' : 'text-mute'
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
+          {menuDropdownOpen && (
+            <div className="absolute left-0 mt-3 w-56 rounded-lg border border-hairline-strong bg-surface-elevated p-1 shadow-2xl z-50">
+              <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-mute border-b border-hairline mb-1 select-none">
+                Menu
               </div>
-            )}
-          </div>
+              {navLinks.map((link) => {
+                const active = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMenuDropdownOpen(false)}
+                    className={`flex w-full items-center px-3 py-2 text-left font-sans text-xs font-semibold rounded hover:bg-surface-card hover:text-ink ${
+                      active ? 'text-ink bg-surface-card/50' : 'text-mute'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Center: Empty to maintain space */}
