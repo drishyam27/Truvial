@@ -50,12 +50,12 @@ jobs:
     - name: Install Frontend Dependencies
       run: |
         cd frontend
-        npm ci
+        npm ci --legacy-peer-deps
 
     - name: Run Vitest Suite
       run: |
         cd frontend
-        npm run test
+        npm run test -- --run
 
     - name: Build Next.js Application
       run: |
