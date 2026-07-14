@@ -1,6 +1,7 @@
 #![cfg(test)]
 use super::*;
 use soroban_sdk::{token, Address, Env, String};
+use soroban_sdk::testutils::Address as _;
 use truvial_treasury::TreasuryContract;
 
 #[test]

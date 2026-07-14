@@ -1,6 +1,7 @@
 #![cfg(test)]
 use super::*;
 use soroban_sdk::{token, Address, Env};
+use soroban_sdk::testutils::Address as _;
 
 #[test]
 fn test_treasury_donation_and_release() {
@@ -19,7 +20,7 @@ fn test_treasury_donation_and_release() {
     let treasury_id = env.register_contract(None, TreasuryContract);
     let treasury_client = TreasuryContractClient::new(&env, &treasury_id);
 
-    let distribution_contract = Address::generate(&env);
+    let distribution_contract = env.register_contract(None, TreasuryContract);
 
     // Initialize Treasury
     treasury_client.initialize(&admin, &distribution_contract, &token_id);
