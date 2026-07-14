@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useWalletStore } from '../state/wallet';
@@ -16,6 +16,22 @@ export default function Navbar() {
   const [roleSelectOpen, setRoleSelectOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [menuDropdownOpen, setMenuDropdownOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('truvial_theme') as 'dark' | 'light';
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.body.classList.toggle('light', savedTheme === 'light');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('truvial_theme', nextTheme);
+    document.body.classList.toggle('light', nextTheme === 'light');
+  };
 
   const pendingCount = transactions.filter((t) => t.status === 'pending' || t.status === 'processing').length;
 
@@ -111,6 +127,46 @@ export default function Navbar() {
               {userRole.toUpperCase()}
             </span>
           )}
+          {/* Theme Toggle */}
+          <div className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-surface-card transition-colors mr-1">
+            <label htmlFor="themeToggle" className="themeToggle st-sunMoonThemeToggleBtn w-5 h-5 flex items-center justify-center relative">
+              <input
+                type="checkbox"
+                id="themeToggle"
+                className="themeToggleInput absolute inset-0 opacity-0 cursor-pointer"
+                checked={theme === 'light'}
+                onChange={toggleTheme}
+              />
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                stroke="none"
+                className="text-mute hover:text-ink transition-colors"
+              >
+                <mask id="moon-mask">
+                  <rect x="0" y="0" width="20" height="20" fill="white"></rect>
+                  <circle cx="11" cy="3" r="8" fill="black"></circle>
+                </mask>
+                <circle
+                  className="sunMoon"
+                  cx="10"
+                  cy="10"
+                  r="8"
+                  mask="url(#moon-mask)"
+                ></circle>
+                <g>
+                  <circle className="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
+                  <circle className="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
+                  <circle className="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
+                  <circle className="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
+                  <circle className="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
+                  <circle className="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
+                </g>
+              </svg>
+            </label>
+          </div>
 
           <div className="relative flex items-center space-x-3 bg-surface-card border border-hairline rounded-full pl-3.5 pr-2 py-1">
             <span className="font-sans text-xs font-semibold text-body-text select-none">

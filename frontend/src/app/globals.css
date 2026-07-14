@@ -2,19 +2,19 @@
 @import "tailwindcss";
 
 @theme {
-  --color-canvas: #000000;
-  --color-surface-card: #0a0a0c;
-  --color-surface-elevated: #101012;
-  --color-surface-deep: #06060a;
+  --color-canvas: var(--color-canvas);
+  --color-surface-card: var(--color-surface-card);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-surface-deep: var(--color-surface-deep);
   
-  --color-primary-white: #fcfdff;
-  --color-primary-on: #000000;
-  --color-ink: #fcfdff;
-  --color-body-text: rgba(252,253,255,0.86);
-  --color-charcoal: rgba(252,253,255,0.7);
-  --color-mute: #a1a4a5;
-  --color-ash: #888e90;
-  --color-stone: #464a4d;
+  --color-primary-white: var(--color-primary-white);
+  --color-primary-on: var(--color-primary-on);
+  --color-ink: var(--color-ink);
+  --color-body-text: var(--color-body-text);
+  --color-charcoal: var(--color-charcoal);
+  --color-mute: var(--color-mute);
+  --color-ash: var(--color-ash);
+  --color-stone: var(--color-stone);
   
   --color-accent-orange: #ff801f;
   --color-accent-orange-glow: rgba(255,89,0,0.22);
@@ -26,9 +26,9 @@
   --color-accent-red: #ff2047;
   --color-accent-red-glow: rgba(255,32,71,0.34);
   
-  --color-hairline: rgba(255,255,255,0.06);
-  --color-hairline-strong: rgba(255,255,255,0.14);
-  --color-divider-soft: rgba(255,255,255,0.04);
+  --color-hairline: var(--color-hairline);
+  --color-hairline-strong: var(--color-hairline-strong);
+  --color-divider-soft: var(--color-divider-soft);
   
   --font-serif: "Playfair Display", Georgia, serif;
   --font-favorit: "Inter Tight", "ABC Favorit", sans-serif;
@@ -44,6 +44,47 @@
 :root {
   --background: #000000;
   --foreground: #fcfdff;
+
+  --color-canvas: #000000;
+  --color-surface-card: #0a0a0c;
+  --color-surface-elevated: #101012;
+  --color-surface-deep: #06060a;
+  
+  --color-primary-white: #fcfdff;
+  --color-primary-on: #000000;
+  --color-ink: #fcfdff;
+  --color-body-text: rgba(252, 253, 255, 0.86);
+  --color-charcoal: rgba(252, 253, 255, 0.7);
+  --color-mute: #a1a4a5;
+  --color-ash: #888e90;
+  --color-stone: #464a4d;
+  
+  --color-hairline: rgba(255, 255, 255, 0.06);
+  --color-hairline-strong: rgba(255, 255, 255, 0.14);
+  --color-divider-soft: rgba(255, 255, 255, 0.04);
+}
+
+.light {
+  --background: #f4f5f6;
+  --foreground: #09090b;
+
+  --color-canvas: #f4f5f6;
+  --color-surface-card: #ffffff;
+  --color-surface-elevated: #fcfdff;
+  --color-surface-deep: #e4e5e7;
+  
+  --color-primary-white: #09090b;
+  --color-primary-on: #ffffff;
+  --color-ink: #09090b;
+  --color-body-text: rgba(9, 9, 11, 0.86);
+  --color-charcoal: rgba(9, 9, 11, 0.7);
+  --color-mute: #71717a;
+  --color-ash: #a1a1aa;
+  --color-stone: #d4d4d8;
+  
+  --color-hairline: rgba(9, 9, 11, 0.06);
+  --color-hairline-strong: rgba(9, 9, 11, 0.14);
+  --color-divider-soft: rgba(9, 9, 11, 0.04);
 }
 
 body {
@@ -198,4 +239,102 @@ body {
   width: 50%;
   top: 50%;
 }
+
+/* From Uiverse.io by Type-Delta - Sun/Moon Theme Toggle customized */
+.themeToggle {
+  color: var(--color-mute);
+  width: 20px;
+  height: 20px;
+  transition: color 0.2s ease;
+}
+
+.themeToggle:hover {
+  color: var(--color-ink);
+}
+
+.st-sunMoonThemeToggleBtn {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.st-sunMoonThemeToggleBtn .themeToggleInput {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.st-sunMoonThemeToggleBtn svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s ease;
+  transform: rotate(40deg);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.st-sunMoonThemeToggleBtn svg .sunMoon {
+  transform-origin: center center;
+  transition: inherit;
+  transform: scale(1);
+}
+
+.st-sunMoonThemeToggleBtn svg .sunRay {
+  transform-origin: center center;
+  transform: scale(0);
+  transition: transform 0.3s ease;
+}
+
+.st-sunMoonThemeToggleBtn svg mask > circle {
+  transition: transform 0.64s cubic-bezier(0.41, 0.64, 0.32, 1.575);
+  transform: translate(0px, 0px);
+}
+
+.st-sunMoonThemeToggleBtn svg .sunRay2 {
+  animation-delay: 0.05s !important;
+}
+.st-sunMoonThemeToggleBtn svg .sunRay3 {
+  animation-delay: 0.1s !important;
+}
+.st-sunMoonThemeToggleBtn svg .sunRay4 {
+  animation-delay: 0.17s !important;
+}
+.st-sunMoonThemeToggleBtn svg .sunRay5 {
+  animation-delay: 0.25s !important;
+}
+.st-sunMoonThemeToggleBtn svg .sunRay6 {
+  animation-delay: 0.29s !important;
+}
+
+.st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg {
+  transform: rotate(90deg);
+}
+.st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg mask > circle {
+  transform: translate(16px, -3px);
+}
+.st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg .sunMoon {
+  transform: scale(0.55);
+}
+.st-sunMoonThemeToggleBtn .themeToggleInput:checked + svg .sunRay {
+  animation: showRay1832 0.4s ease 0s 1 forwards;
+}
+
+@keyframes showRay1832 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 
