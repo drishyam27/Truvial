@@ -21,3 +21,7 @@ Thumbs.db
 
 # Project-specific local outputs
 contracts-metadata.json
+
+# Test snapshots & temporary directories
+**/test_snapshots/
+soroban-hello-world/
