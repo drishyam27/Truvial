@@ -72,3 +72,47 @@ fn test_already_initialized() {
     treasury_client.initialize(&admin, &distribution, &token);
     treasury_client.initialize(&admin, &distribution, &token);
 }
+
+#[test]
+#[should_panic(expected = "amount must be positive")]
+fn test_donation_invalid_amount() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let distribution = env.register_contract(None, TreasuryContract);
+    let token = Address::generate(&env);
+
+    let treasury_id = env.register_contract(None, TreasuryContract);
+    let treasury_client = TreasuryContractClient::new(&env, &treasury_id);
+
+    treasury_client.initialize(&admin, &distribution, &token);
+
+    let donor = Address::generate(&env);
+    // Donating 0 should panic
+    treasury_client.donate(&donor, &0);
+}
+
+#[test]
+#[should_panic]
+fn test_unauthorized_release() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let distribution = env.register_contract(None, TreasuryContract);
+    let token = Address::generate(&env);
+
+    let treasury_id = env.register_contract(None, TreasuryContract);
+    let treasury_client = TreasuryContractClient::new(&env, &treasury_id);
+
+    treasury_client.initialize(&admin, &distribution, &token);
+
+    let beneficiary = Address::generate(&env);
+    let unauthorized_caller = Address::generate(&env);
+
+    // Call from unauthorized address (not distribution) should panic
+    env.as_contract(&unauthorized_caller, || {
+        treasury_client.release_funds(&beneficiary, &100);
+    });
+}
