@@ -181,7 +181,7 @@ body {
 /* Burger menu button - Uiverse.io by tarantino421 (customized for navbar) */
 .buttons__burger {
   --size: 20px;
-  --clr: rgba(252, 253, 255, 0.7);
+  --clr: var(--color-mute);
   width: var(--size);
   height: calc(0.7 * var(--size));
   cursor: pointer;
@@ -191,7 +191,7 @@ body {
 }
 
 .buttons__burger:hover {
-  --clr: #fcfdff;
+  --clr: var(--color-ink);
 }
 
 .buttons__burger #burger {
