@@ -97,20 +97,33 @@ body {
 }
 
 /* Custom glow utility */
+/* Custom glow utility */
 .glow-orange {
   background: radial-gradient(circle at top, rgba(255,89,0,0.12) 0%, rgba(0,0,0,0) 70%);
+}
+.light .glow-orange {
+  background: radial-gradient(circle at top, rgba(255,89,0,0.28) 0%, rgba(244,245,246,0) 70%);
 }
 
 .glow-blue {
   background: radial-gradient(circle at top, rgba(0,117,255,0.15) 0%, rgba(0,0,0,0) 70%);
 }
+.light .glow-blue {
+  background: radial-gradient(circle at top, rgba(0,117,255,0.28) 0%, rgba(244,245,246,0) 70%);
+}
 
 .glow-green {
   background: radial-gradient(circle at top, rgba(34,255,153,0.08) 0%, rgba(0,0,0,0) 70%);
 }
+.light .glow-green {
+  background: radial-gradient(circle at top, rgba(34,255,153,0.24) 0%, rgba(244,245,246,0) 70%);
+}
 
 .glow-red {
   background: radial-gradient(circle at top, rgba(255,32,71,0.15) 0%, rgba(0,0,0,0) 70%);
+}
+.light .glow-red {
+  background: radial-gradient(circle at top, rgba(255,32,71,0.28) 0%, rgba(244,245,246,0) 70%);
 }
 
 /* Custom scrollbar for Resend theme */
