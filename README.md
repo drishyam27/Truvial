@@ -331,25 +331,21 @@ Once deployed, you can verify contract addresses and transaction logs on Stellar
 
 <!-- Screenshot Placeholder: Desktop UI -->
 ### Desktop View
-[SCREENSHOT_DESKTOP_PLACEHOLDER]
-
+<img width="1600" height="900" alt="WhatsApp Image 2026-07-14 at 5 47 38 PM" src="https://github.com/user-attachments/assets/0ad8859a-e77a-4127-802b-a761c586d824" />
+<img width="1600" height="900" alt="WhatsApp Image 2026-07-14 at 6 00 02 PM" src="https://github.com/user-attachments/assets/694de797-f725-4c85-a3b0-5cdc034dbcf8" />
 
 ### Mobile Responsive View
-[SCREENSHOT_MOBILE_PLACEHOLDER]
-
+<img width="750" height="1599" alt="image" src="https://github.com/user-attachments/assets/1bf1232d-f3d9-466f-9768-d10f17241827" />
+<img width="750" height="1599" alt="image" src="https://github.com/user-attachments/assets/7c68e4ea-3915-47d3-91fc-bed83d526d3e" />
 
 ### Multi-Wallet Integration
-[SCREENSHOT_WALLET_PLACEHOLDER]
+<img width="1600" height="900" alt="WhatsApp Image 2026-07-14 at 5 48 55 PM" src="https://github.com/user-attachments/assets/5fe8fc05-9c35-4037-a333-9c4f72fc2779" />
 
-
-<!-- Screenshot Placeholder: CI/CD Pipeline -->
 ### Deployed Testnet Transaction
-[SCREENSHOT_TRANSACTION_PLACEHOLDER]
-
+<img width="1600" height="756" alt="WhatsApp Image 2026-07-14 at 5 32 26 PM" src="https://github.com/user-attachments/assets/25dc72c4-8e3d-4a5b-9af0-c9dd6d3e175e" />
 
 ### CI/CD Pipeline
-[SCREENSHOT_CICD_PLACEHOLDER]
-
+<img width="1457" height="535" alt="WhatsApp Image 2026-07-14 at 5 46 15 PM" src="https://github.com/user-attachments/assets/dcb5b54c-f50c-4fc6-88a4-19ef58866d20" />
 
 ### Test Output
-[SCREENSHOT_TEST_PLACEHOLDER]
+<img width="888" height="172" alt="WhatsApp Image 2026-07-14 at 5 37 06 PM" src="https://github.com/user-attachments/assets/e3302518-5429-4d08-90d2-f773b6354a46" />
