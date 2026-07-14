@@ -1,4 +1,4 @@
-<h1 align="center">🏆 Truvial Charity Escrow & Distribution 🔗</h1>
+<h1 align="center">Truvial Charity Escrow & Distribution</h1>
 
 <p align="center">
   <strong>A Decentralized, Milestone-Based Charity Treasury Management Platform built on the Stellar network using decoupled Soroban smart contracts.</strong>
@@ -35,7 +35,7 @@
 
 ---
 
-## 📌 Table of Contents
+## Table of Contents
 
 * [1. Product Overview & Problem Statement](#overview)
   * [The Problem](#the-problem)
@@ -66,7 +66,7 @@
 ---
 
 <a name="overview"></a>
-## 🔍 1. Product Overview & Problem Statement
+## 1. Product Overview & Problem Statement
 
 ### The Problem
 Traditional charitable giving suffers from a lack of transparency and real-time accountability. Donors contribute capital to centralized organizations but lose visibility over how, when, and where their funds are spent. Administrative inefficiencies, lack of verification on completed goals, and misappropriation of capital lead to donor fatigue and reduced trust in global philanthropy.
@@ -80,7 +80,7 @@ Truvial resolves these structural limitations using:
 ---
 
 <a name="tech-stack"></a>
-## 🛠️ 2. Technical Stack
+## 2. Technical Stack
 
 * **Smart Contracts:** Rust, Soroban SDK (pinned to `v22.0.0` for maximum environment compatibility)
 * **Frontend:** Next.js 16 (App Router), TypeScript, Tailwind CSS, lucide-react
@@ -92,7 +92,7 @@ Truvial resolves these structural limitations using:
 ---
 
 <a name="directory-structure"></a>
-## 📂 3. Directory Structure
+## 3. Directory Structure
 
 The project is organized with a feature-based architecture separating smart contracts, deployment tools, and the Next.js frontend app:
 
@@ -132,7 +132,7 @@ Truvial/
 ---
 
 <a name="architecture"></a>
-## 📐 4. Technical Architecture & Component Flow
+## 4. Technical Architecture & Component Flow
 
 <a name="decoupled-flow"></a>
 ### 1. Decoupled Access Control Flow
@@ -193,7 +193,7 @@ sequenceDiagram
 ---
 
 <a name="contract-design"></a>
-## 📜 5. Smart Contract Design
+## 5. Smart Contract Design
 
 <a name="storage-design"></a>
 ### Data Storage & TTL Preservation
@@ -208,7 +208,7 @@ sequenceDiagram
 ---
 
 <a name="development"></a>
-## 🧪 6. Local Development & Testing
+## 6. Local Development & Testing
 
 <a name="prerequisites"></a>
 ### Prerequisites
@@ -236,7 +236,7 @@ npm run dev
 ---
 
 <a name="deployment-guide"></a>
-## 🚀 7. Stellar Testnet Deployment Guide
+## 7. Stellar Testnet Deployment Guide
 
 <a name="deployer-identity"></a>
 ### Step 1: Configure Deployer Identity
@@ -303,7 +303,7 @@ stellar contract invoke \
 ---
 
 <a name="verification"></a>
-## 📊 8. Deployed Contract Verification
+## 8. Deployed Contract Verification
 
 <a name="verification-links"></a>
 ### On-Chain Contract Verification Links
@@ -319,7 +319,7 @@ Once deployed, you can verify contract addresses and transaction logs on Stellar
 ---
 
 <a name="security"></a>
-## 🛡️ 9. Security Considerations
+## 9. Security Considerations
 
 * **Decoupled Roles Checks**: Access control checks (`require_auth`) are validated before any token transfers. State updates are executed before cross-contract commands are triggered.
 * **Storage Leases**: Persistent storage keys have automated lease extension checks (`extend_ttl`) built directly into write functions to prevent resource eviction.
@@ -327,7 +327,7 @@ Once deployed, you can verify contract addresses and transaction logs on Stellar
 ---
 
 <a name="screenshots"></a>
-## 📸 10. Project Media & Screenshots
+## 10. Project Media & Screenshots
 
 <!-- Screenshot Placeholder: Desktop UI -->
 ### Desktop View
