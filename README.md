@@ -1,163 +1,355 @@
-# Truvial - Decentralized Charity Fund Distribution System
+<h1 align="center">🏆 Truvial Charity Escrow & Distribution 🔗</h1>
 
-Truvial (Trust & Alluvial) is a production-grade transparent treasury and donation management platform built on **Stellar (Soroban)**. It enforces milestone-based fund releases using Role-Based Access Control (RBAC) and real-time ledger tracking.
+<p align="center">
+  <strong>A Decentralized, Milestone-Based Charity Treasury Management Platform built on the Stellar network using decoupled Soroban smart contracts.</strong>
+</p>
+
+<p align="center">
+  <a href="https://truvial.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/LIVE_DEMO-TRUVIAL.VERCEL.APP-cyan?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/drishyam27/Truvial/actions/workflows/ci-cd.yml" target="_blank">
+    <img src="https://github.com/drishyam27/Truvial/actions/workflows/ci-cd.yml/badge.svg" alt="CI/CD Pipeline" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="#overview">Overview</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="#directory-structure">Directory Structure</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#development">Development</a> •
+  <a href="#deployment-guide">Deployment Guide</a> •
+  <a href="#screenshots">Screenshots</a>
+</p>
 
 ---
 
-## 1. Product Overview & Problem Statement
-
-Traditional charitable giving suffers from a **black-box problem**: donors contribute funds to a central entity but lose visibility over where, when, and how those funds are spent. Administrative overhead and lack of alignment on project targets lead to donor fatigue and inefficiencies.
-
-**Truvial solves this by:**
-1. **Securing Escrows**: Donor funds are locked inside an immutable `treasury` smart contract.
-2. **Enforcing Milestones**: Payouts are bound to charity milestones. Capital is only released when designated administrators approve completed targets.
-3. **Immutable Verification**: Every transaction, project registration, and payout emits a Soroban event, enabling donors to track the flow of funds in real-time.
+* **GitHub Repository:** [drishyam27/Truvial](https://github.com/drishyam27/Truvial)
+* **Walkthrough Demo Video:**
+  
+[VIDEO_LINK_PLACEHOLDER]
 
 ---
 
-## 2. Architecture & Design
+## 📌 Table of Contents
 
-### Smart Contract Design
-Truvial splits logic and state across two smart contracts to implement the Principle of Least Privilege:
-*   **`treasury_contract`**: Stores and locks ERC-20 tokens (native XLM via Stellar Asset Contract). Restricts fund releases to calls made exclusively by the `distribution_contract`.
-*   **`distribution_contract`**: Manages charity projects, milestone configurations, and whitelisting of beneficiary addresses. Executes cross-contract calls to the `treasury` to release funds when milestones are approved.
+* [1. Product Overview & Problem Statement](#overview)
+  * [The Problem](#the-problem)
+  * [The Truvial Solution](#the-truvial-solution)
+* [2. Technical Stack](#tech-stack)
+* [3. Directory Structure](#directory-structure)
+* [4. Technical Architecture & Component Flow](#architecture)
+  * [1. Decoupled Access Control Flow](#decoupled-flow)
+  * [2. Inter-Contract Communication Sequence](#inter-contract-communication)
+* [5. Smart Contract Design](#contract-design)
+  * [Data Storage & TTL Preservation](#storage-design)
+  * [Access Control](#access-control)
+* [6. Local Development & Testing](#development)
+  * [Prerequisites](#prerequisites)
+  * [Compilation & Testing](#compilation-testing)
+  * [Frontend Development](#frontend-dev)
+* [7. Stellar Testnet Deployment Guide](#deployment-guide)
+  * [Step 1: Configure Deployer Identity](#deployer-identity)
+  * [Step 2: Compile WASM Bytecodes](#compile-wasm)
+  * [Step 3: Deploy Charity Treasury](#deploy-treasury)
+  * [Step 4: Deploy Milestone Distribution](#deploy-distribution)
+  * [Step 5: Initialize Contracts & Configure Escrow](#initialize-contracts)
+* [8. Deployed Contract Verification](#verification)
+  * [On-Chain Contract Verification Links](#verification-links)
+* [9. Security Considerations](#security)
+* [10. Project Media & Screenshots](#screenshots)
 
-```mermaid
-classDiagram
-    class TreasuryContract {
-        +initialize(admin, distribution, token)
-        +donate(donor, amount)
-        +release_funds(beneficiary, amount)
-        +get_donor_balance(donor)
-        +get_total_donated()
-    }
-    class DistributionContract {
-        +initialize(admin, treasury)
-        +add_beneficiary(beneficiary)
-        +create_project(title, beneficiary, total_budget)
-        +add_milestone(project_id, title, amount)
-        +approve_milestone(project_id, milestone_id)
-        +release_milestone_funds(project_id, milestone_id)
-    }
-    DistributionContract --> TreasuryContract : "Cross-Contract Call (release_funds)"
+---
+
+<a name="overview"></a>
+## 🔍 1. Product Overview & Problem Statement
+
+### The Problem
+Traditional charitable giving suffers from a lack of transparency and real-time accountability. Donors contribute capital to centralized organizations but lose visibility over how, when, and where their funds are spent. Administrative inefficiencies, lack of verification on completed goals, and misappropriation of capital lead to donor fatigue and reduced trust in global philanthropy.
+
+### The Truvial Solution
+Truvial resolves these structural limitations using:
+* **Decoupled Treasury Escrow**: Donor funds are locked securely in an immutable `Treasury` smart contract, completely separated from the distribution logic.
+* **Milestone-Based Releases**: Capital is only disbursed to beneficiaries when specific project milestones are completed and verified by designated administrators.
+* **Contract-to-Contract (C2C) Payout Calls**: The `Distribution` contract manages project registries, whitelist configurations, and approval checks. It executes cross-contract calls to the `Treasury` to release milestone payouts only when strict validation criteria are met.
+
+---
+
+<a name="tech-stack"></a>
+## 🛠️ 2. Technical Stack
+
+* **Smart Contracts:** Rust, Soroban SDK (pinned to `v22.0.0` for maximum environment compatibility)
+* **Frontend:** Next.js 16 (App Router), TypeScript, Tailwind CSS, lucide-react
+* **State Management:** Zustand (wallet session persistence, transaction logs)
+* **Data Querying:** React Query (RPC state status synchronization)
+* **Wallet Connection:** `@creit.tech/stellar-wallets-kit` SDK (Freighter / xBull / LOBSTR)
+* **Web3 Design Aesthetics:** Premium dark-mode aesthetic with custom radial glows, animated burger menu, copy address button, and custom Sun/Moon theme toggler.
+
+---
+
+<a name="directory-structure"></a>
+## 📂 3. Directory Structure
+
+The project is organized with a feature-based architecture separating smart contracts, deployment tools, and the Next.js frontend app:
+
+```
+Truvial/
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml                  # CI/CD Pipeline Configuration
+├── contracts/
+│   ├── treasury/
+│   │   ├── src/
+│   │   │   ├── lib.rs                 # Treasury escrow contract & storage
+│   │   │   └── test.rs                # Treasury unit test suite
+│   │   └── Cargo.toml                 # Treasury manifest
+│   └── distribution/
+│       ├── src/
+│       │   ├── lib.rs                 # Milestone contract rules & C2C calls
+│       │   └── test.rs                # Distribution unit test suite
+│       └── Cargo.toml                 # Distribution manifest
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── dashboard/             # Admin workspace
+│   │   │   ├── settings/              # Settings & Custom Contract binding
+│   │   │   └── page.tsx               # Home & Public Verification page
+│   │   ├── components/                # Header, Footer, Providers
+│   │   ├── services/
+│   │   │   └── stellar.ts             # Transaction building & signing layers
+│   │   └── state/
+│   │       └── wallet.ts              # Zustand wallet status manager
+│   │       └── tx.ts                  # Zustand transaction status store
+│   ├── package.json                   # Frontend node packages
+│   └── tsconfig.json                  # TypeScript settings
+└── Cargo.toml                         # Workspace Cargo configuration
 ```
 
-### Inter-Contract Communication Flow
+---
+
+<a name="architecture"></a>
+## 📐 4. Technical Architecture & Component Flow
+
+<a name="decoupled-flow"></a>
+### 1. Decoupled Access Control Flow
+
+```mermaid
+graph TD
+    Owner[Platform Owner]
+    Admin[Admin Account]
+    Donor[Donor Wallet]
+    Beneficiary[Beneficiary Wallet]
+    
+    subgraph Soroban Smart Contracts
+        Treasury[Treasury Escrow Contract]
+        Dist[Milestone Distribution Contract]
+    end
+    
+    subgraph Storage Layout
+        InstanceTreas[(Instance Storage: Admin & Token Ref)]
+        PersistentTreas[(Persistent Storage: Donor Balances)]
+        InstanceDist[(Instance Storage: Owner & Treasury Ref)]
+        PersistentDist[(Persistent Storage: Projects & Milestones)]
+    end
+
+    Owner -->|Initialize| Treas
+    Donor -->|Donate Funds| Treas
+    Treas -->|Read configs| InstanceTreas & PersistentTreas
+    
+    Admin -->|Approve Milestone| Dist
+    Dist -->|Release Milestone Funds C2C| Treas
+    Dist -->|Read Configs| InstanceDist
+    Dist -->|Save Milestones| PersistentDist
+    
+    Treas -->|Transfer Payout| Beneficiary
+```
+
+<a name="inter-contract-communication"></a>
+### 2. Inter-Contract Communication Sequence
+
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Donor
-    actor Admin
-    actor Beneficiary
-    participant DistContract as Distribution Contract
-    participant TreasContract as Treasury Contract
-    participant TokenContract as SAC Token Contract
+    actor Admin as Platform Admin
+    participant Dist as Distribution Contract
+    participant Treasury as Treasury Escrow Contract
+    participant Token as SAC Token Contract
 
-    Donor->>TreasContract: donate(amount)
-    TreasContract->>TokenContract: transfer(Donor, Treasury, amount)
-    Admin->>DistContract: create_project(beneficiary, budget)
-    Admin->>DistContract: add_milestone(project_id, title, amount)
-    Admin->>DistContract: approve_milestone(project_id, milestone_id)
-    Admin->>DistContract: release_milestone_funds(project_id, milestone_id)
-    DistContract->>TreasContract: release_funds(beneficiary, amount)
-    TreasContract->>TokenContract: transfer(Treasury, Beneficiary, amount)
-    TokenContract-->>Beneficiary: Funds Transferred
+    Admin->>Dist: approve_milestone(project_id, milestone_id)
+    Note over Dist: Performs admin.require_auth()
+    Dist->>Dist: Updates milestone status to Approved
+    Dist->>Treasury: release_funds(beneficiary_address, milestone_amount)
+    Note over Treasury: Verifies caller is registered Distribution contract
+    Treasury->>Token: transfer(treasury_address, beneficiary_address, milestone_amount)
+    Token-->>Treasury: Payout complete
+    Treasury-->>Dist: Success callback
+    Dist-->>Admin: Transaction complete
 ```
 
 ---
 
-## 3. Tech Stack
+<a name="contract-design"></a>
+## 📜 5. Smart Contract Design
 
-*   **Smart Contracts**: Rust, Soroban SDK v22.0.0
-*   **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS v4, Lucide React, Recharts
-*   **State Management**: Zustand
-*   **Data Fetching**: TanStack React Query v5
-*   **Wallet Integration**: `StellarWalletsKit`
-*   **Testing**: Rust cargo tests (contracts), Vitest (frontend)
+<a name="storage-design"></a>
+### Data Storage & TTL Preservation
+* **Instance Storage**: Used for configurations, referencing target contract variables, and owner parameters (e.g. `Admin`, `Distribution`, and `Token` references in the treasury contract) to optimize transaction footprints.
+* **Persistent Storage**: Holds user balance registers (`DonorBalance`), projects, and milestone structures (`Project`, `Milestone`) with Soroban state leases to guarantee permanent storage integrity.
+
+<a name="access-control"></a>
+### Access Control
+* **Authorization Enforcement**: Every state-modifying function enforces authorization signatures using `address.require_auth()`.
+* **Inter-Contract Verification**: The Treasury contract verifies that the caller address matches the registered `Distribution` contract dynamically via a caller identity check during `release_funds`.
 
 ---
 
-## 4. Local Development & Setup
+<a name="development"></a>
+## 🧪 6. Local Development & Testing
 
+<a name="prerequisites"></a>
 ### Prerequisites
-*   Node.js (v20+)
-*   Rust and Cargo
-*   Stellar CLI (v27+)
-    ```bash
-    cargo install --locked stellar-cli --features opt
-    ```
+* Rust & Cargo (with `wasm32v1-none` target configured)
+* Node.js v20+
 
-### Smart Contracts (Soroban)
-1. Navigate to the root directory.
-2. Run compilation:
-   ```bash
-   cargo build --target wasm32-unknown-unknown --release
-   ```
-3. Run smart contract unit tests (with mock token setup):
-   ```bash
-   cargo test
-   ```
+<a name="compilation-testing"></a>
+### Compilation & Testing
+```bash
+# Run contract unit tests
+cargo test
 
-### Frontend
-1. Navigate to the `frontend` directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Set up environment variables:
-   ```bash
-   cp ../.env.example .env.local
-   ```
-4. Start development server:
-   ```bash
-   npm run dev
-   ```
-5. Run frontend state unit tests using Vitest:
-   ```bash
-   npm run test
-   ```
+# Compile optimized WASM binaries
+cargo build --target wasm32v1-none --release
+```
+
+<a name="frontend-dev"></a>
+### Frontend Development
+```bash
+cd frontend
+npm install --ignore-scripts
+npm run dev
+```
 
 ---
 
-## 5. Deployment Instructions (Stellar Testnet)
+<a name="deployment-guide"></a>
+## 🚀 7. Stellar Testnet Deployment Guide
 
-To deploy both contracts onto the Stellar Testnet:
+<a name="deployer-identity"></a>
+### Step 1: Configure Deployer Identity
+Generate and fund a test account:
+```bash
+stellar keys generate tiyu --network testnet --fund
+```
 
-1. **Configure Keys**: Create or import your Stellar account (e.g., `alice`):
-   ```bash
-   stellar keys generate alice --network testnet
-   ```
-2. **Fund Wallet**: Fund your account using Friendbot:
-   ```bash
-   stellar keys fund alice
-   ```
-3. **Execute Deploy Script**: Run the Node script from the root workspace directory:
-   ```bash
-   node scripts/deploy.js
-   ```
-4. **Metadata Log**: Once completed, the script saves all details to `contracts-metadata.json`. Copy the output IDs and paste them into your `.env.local` file.
+<a name="compile-wasm"></a>
+### Step 2: Compile WASM targets
+```bash
+cargo build --target wasm32v1-none --release
+```
+This generates the optimized WASM files in `target/wasm32v1-none/release/`.
+
+<a name="deploy-treasury"></a>
+### Step 3: Deploy Charity Treasury
+```bash
+stellar contract deploy \
+  --wasm target/wasm32v1-none/release/truvial_treasury.wasm \
+  --source-account tiyu \
+  --network testnet \
+  --alias truvial_treasury
+```
+* **Output Address**: `CAF6HNIVLT63MSPNEU4HFZKUOBNVTFP5DJ3HS2XVICUKJBJN3DAWFJC5`
+
+<a name="deploy-distribution"></a>
+### Step 4: Deploy Milestone Distribution
+```bash
+stellar contract deploy \
+  --wasm target/wasm32v1-none/release/truvial_distribution.wasm \
+  --source-account tiyu \
+  --network testnet \
+  --alias truvial_distribution
+```
+* **Output Address**: `CAHQYPGH7MZIKSQVOOEZBZMH2Z3QSAWQSCNW6LO44HJX3L5JKEZHUQ65`
+
+<a name="initialize-contracts"></a>
+### Step 5: Initialize Contracts & Configure Escrow
+
+1. **Initialize the Treasury**:
+```bash
+stellar contract invoke \
+  --id CAF6HNIVLT63MSPNEU4HFZKUOBNVTFP5DJ3HS2XVICUKJBJN3DAWFJC5 \
+  --source-account tiyu \
+  --network testnet \
+  -- initialize \
+  --admin GDSNO2OFPJAHEPKKOVYYG3KQU4OKOHGXMZ3ORHSPKGHU5ZUN7Z42ZDJD \
+  --distribution_contract CAHQYPGH7MZIKSQVOOEZBZMH2Z3QSAWQSCNW6LO44HJX3L5JKEZHUQ65 \
+  --token CDLZFC3SYJYDZT7KBAVPPN3OSPGL63B676ER7G7JPHCSCC57IOKRLZAI
+```
+
+2. **Initialize the Distribution** (binding it to the Treasury address):
+```bash
+stellar contract invoke \
+  --id CAHQYPGH7MZIKSQVOOEZBZMH2Z3QSAWQSCNW6LO44HJX3L5JKEZHUQ65 \
+  --source-account tiyu \
+  --network testnet \
+  -- initialize \
+  --admin GDSNO2OFPJAHEPKKOVYYG3KQU4OKOHGXMZ3ORHSPKGHU5ZUN7Z42ZDJD \
+  --treasury CAF6HNIVLT63MSPNEU4HFZKUOBNVTFP5DJ3HS2XVICUKJBJN3DAWFJC5
+```
 
 ---
 
-## 6. Contract Registry
+<a name="verification"></a>
+## 📊 8. Deployed Contract Verification
 
-| Contract | Network | Address |
+<a name="verification-links"></a>
+### On-Chain Contract Verification Links
+
+Once deployed, you can verify contract addresses and transaction logs on StellarExpert:
+
+| Contract / TX | Address / Hash | Explorer Link |
 | --- | --- | --- |
-| **Treasury Contract** | Stellar Testnet | `CDDONORSECURETREASURY777KEY` |
-| **Distribution Contract** | Stellar Testnet | `CDDISTRIBUTIONRBACPAYOUTS777KEY` |
-| **Native XLM Contract (SAC)** | Stellar Testnet | `CDLZFC3SYJYDZT7KBAVPPN3OSPGL63B676ER7G7JPHCSCC57IOKRLZAI` |
-
-*Note: Replace address strings with your actual deployed keys when deploying custom builds.*
+| **Charity Treasury Contract** | `CAF6HNIVLT63MSPNEU4HFZKUOBNVTFP5DJ3HS2XVICUKJBJN3DAWFJC5` | [View on StellarExpert](https://stellar.expert/explorer/testnet/contract/CAF6HNIVLT63MSPNEU4HFZKUOBNVTFP5DJ3HS2XVICUKJBJN3DAWFJC5) |
+| **Milestone Distribution Contract** | `CAHQYPGH7MZIKSQVOOEZBZMH2Z3QSAWQSCNW6LO44HJX3L5JKEZHUQ65` | [View on StellarExpert](https://stellar.expert/explorer/testnet/contract/CAHQYPGH7MZIKSQVOOEZBZMH2Z3QSAWQSCNW6LO44HJX3L5JKEZHUQ65) |
+| **Native XLM Contract (SAC)** | `CDLZFC3SYJYDZT7KBAVPPN3OSPGL63B676ER7G7JPHCSCC57IOKRLZAI` | [View on StellarExpert](https://stellar.expert/explorer/testnet/contract/CDLZFC3SYJYDZT7KBAVPPN3OSPGL63B676ER7G7JPHCSCC57IOKRLZAI) |
 
 ---
 
-## 7. Security Considerations
+<a name="security"></a>
+## 🛡️ 9. Security Considerations
 
-1. **Reentrancy Protection**: Access control checks (`require_auth`) are placed before any token transfers. State variables are written before cross-contract commands are triggered.
-2. **Access Control**: Payout actions are strictly guarded by checking the caller's identity:
-   *   `release_funds` in the treasury contract throws an error if called by any address other than the registered `distribution_contract`.
-   *   Only authorized charity administrators can register projects, append milestones, and approve payouts in the `distribution_contract`.
-3. **Storage TTL**: In Soroban, persistent data key entries can expire. The contracts use `extend_ttl` on persistent keys (Donor Balances, Project details) to prevent resource deletion and extend lifecycle duration.
+* **Decoupled Roles Checks**: Access control checks (`require_auth`) are validated before any token transfers. State updates are executed before cross-contract commands are triggered.
+* **Storage Leases**: Persistent storage keys have automated lease extension checks (`extend_ttl`) built directly into write functions to prevent resource eviction.
+
+---
+
+<a name="screenshots"></a>
+## 📸 10. Project Media & Screenshots
+
+<!-- Screenshot Placeholder: Desktop UI -->
+### Desktop View
+[SCREENSHOT_DESKTOP_PLACEHOLDER]
+
+
+### Mobile Responsive View
+[SCREENSHOT_MOBILE_PLACEHOLDER]
+
+
+### Multi-Wallet Integration
+[SCREENSHOT_WALLET_PLACEHOLDER]
+
+
+<!-- Screenshot Placeholder: CI/CD Pipeline -->
+### Deployed Testnet Transaction
+[SCREENSHOT_TRANSACTION_PLACEHOLDER]
+
+
+### CI/CD Pipeline
+[SCREENSHOT_CICD_PLACEHOLDER]
+
+
+### Test Output
+[SCREENSHOT_TEST_PLACEHOLDER]
