@@ -31,7 +31,7 @@
 * **GitHub Repository:** [drishyam27/Truvial](https://github.com/drishyam27/Truvial)
 * **Walkthrough Demo Video:**
   
-[VIDEO_LINK_PLACEHOLDER]
+https://github.com/user-attachments/assets/7ab9fbca-ef02-471a-8ddc-8b564296ee53
 
 ---
 
