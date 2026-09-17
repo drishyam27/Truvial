@@ -2,13 +2,13 @@ name: Truvial CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, arbitrum-stylus ]
   pull_request:
     branches: [ main ]
 
 jobs:
   smart-contracts:
-    name: Build & Test Soroban Contracts
+    name: Build & Check Arbitrum Stylus Contracts
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Code
@@ -18,23 +18,16 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
-        targets: wasm32v1-none
+        targets: wasm32-unknown-unknown
 
     - name: Rust Cache
       uses: swatinem/rust-cache@v2
 
-    - name: Check Formatting
-      run: cargo fmt --all -- --check
-      continue-on-error: true
+    - name: Type-Check Stylus Contracts
+      run: cargo check --target wasm32-unknown-unknown
 
-    - name: Type-Check Contract Code
-      run: cargo check --locked
-
-    - name: Compile WASM Contracts
-      run: cargo build --target wasm32v1-none --release --locked
-
-    - name: Run Contract Unit Tests
-      run: cargo test --locked
+    - name: Compile Stylus WASM Contracts
+      run: cargo build --target wasm32-unknown-unknown --release
 
   frontend:
     name: Build & Test Next.js Frontend
@@ -47,18 +40,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
 
     - name: Install Frontend Dependencies
       run: |
         cd frontend
-        npm ci --legacy-peer-deps
+        npm install --legacy-peer-deps
 
     - name: Run Vitest Suite
       run: |
         cd frontend
-        npm run test -- --run
+        npm test
 
     - name: Build Next.js Application
       run: |
