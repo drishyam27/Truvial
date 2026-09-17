@@ -1,6 +1,5 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useWalletStore, WalletType } from '../state/wallet';
 import { ArbitrumService } from '../services/arbitrum';
 import { X, Check, Copy, Shield, Award, User, Sparkles, LogOut, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
@@ -23,11 +22,16 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
     disconnect 
   } = useWalletStore();
 
+  const [mounted, setMounted] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'admin' | 'donor' | 'beneficiary'>('donor');
   const [connectingType, setConnectingType] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [hasMetaMaskInstalled, setHasMetaMaskInstalled] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -46,7 +50,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleConnect = async (type: WalletType) => {
     setErrorMessage(null);
@@ -73,14 +77,15 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
     }
   };
 
-  return (
+  return createPortal(
     <div 
       onClick={onClose}
-      className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto bg-canvas/80 backdrop-blur-md animate-fadeIn"
+      className="fixed inset-0 z-[999999] flex items-center justify-center p-3 sm:p-4 overflow-y-auto bg-canvas/85 backdrop-blur-md animate-fadeIn"
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999999 }}
     >
       {/* Modal Card */}
       <div 
-        className="relative w-full max-w-md my-auto rounded-2xl border border-hairline-strong bg-surface-elevated shadow-2xl p-5 sm:p-6 overflow-hidden max-h-[calc(100vh-2rem)] flex flex-col"
+        className="relative w-full max-w-md my-auto rounded-2xl border border-hairline-strong bg-surface-elevated shadow-2xl p-5 sm:p-6 overflow-hidden max-h-[calc(100vh-2rem)] flex flex-col z-[1000000]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Background glow effects */}
@@ -362,6 +367,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
+
