@@ -64,52 +64,6 @@ export class ArbitrumService {
     }
   }
 
-  // Connects via Freighter Wallet (Stellar Network)
-  static async connectFreighter(role: 'admin' | 'donor' | 'beneficiary' = 'donor'): Promise<string> {
-    if (typeof window === 'undefined') {
-      throw new Error('Freighter wallet can only be connected in browser environments.');
-    }
-
-    try {
-      const { isConnected, requestAccess, getAddress } = await import('@stellar/freighter-api');
-      
-      const conn = await isConnected();
-      const hasFreighter = conn?.isConnected || !!(window as any).freighter;
-
-      if (!hasFreighter) {
-        throw new Error('Freighter wallet extension is not installed. Please install it from https://www.freighter.app/');
-      }
-
-      const accessResult = await requestAccess();
-      let stellarAddress = accessResult?.address;
-
-      if (!stellarAddress && accessResult?.error) {
-        throw new Error(typeof accessResult.error === 'string' ? accessResult.error : 'Freighter connection was rejected.');
-      }
-
-      if (!stellarAddress) {
-        const addrRes = await getAddress();
-        stellarAddress = addrRes?.address;
-      }
-
-      if (!stellarAddress) {
-        throw new Error('Failed to retrieve account from Freighter. Please ensure your wallet is unlocked.');
-      }
-
-      useWalletStore.getState().connect(
-        stellarAddress,
-        role,
-        'freighter',
-        WalletNetwork.STELLAR_TESTNET,
-        'XLM'
-      );
-      return stellarAddress;
-    } catch (err: any) {
-      console.error('Freighter connection error:', err);
-      throw new Error(err?.message || 'Freighter connection failed. Make sure the extension is unlocked.');
-    }
-  }
-
   // Connects via Simulated Test Profile for instant demo
   static async connectSimulated(role: 'admin' | 'donor' | 'beneficiary' = 'donor'): Promise<string> {
     const mockProfiles: Record<'admin' | 'donor' | 'beneficiary', string> = {
@@ -127,11 +81,8 @@ export class ArbitrumService {
   // Connects wallet: attempts preferred method or falls back intelligently
   static async connectWallet(
     role: 'admin' | 'donor' | 'beneficiary' = 'donor',
-    preferredType?: 'metamask' | 'freighter' | 'simulated'
+    preferredType?: 'metamask' | 'simulated'
   ): Promise<string> {
-    if (preferredType === 'freighter') {
-      return this.connectFreighter(role);
-    }
     if (preferredType === 'metamask') {
       return this.connectMetaMask(role);
     }
@@ -139,7 +90,7 @@ export class ArbitrumService {
       return this.connectSimulated(role);
     }
 
-    // Default fallback logic: try MetaMask if available, else Freighter, else Simulated
+    // Default fallback logic: try MetaMask if available, else Simulated
     if (typeof window !== 'undefined' && (window as any).ethereum) {
       try {
         return await this.connectMetaMask(role);
@@ -156,18 +107,16 @@ export class ArbitrumService {
     useWalletStore.getState().disconnect();
   }
 
-  // Donate to Treasury
+  // Donate USDC to Stylus Treasury on Arbitrum Sepolia
   static async donate(amount: number): Promise<string> {
     const state = useWalletStore.getState();
     const donor = state.publicKey;
     if (!donor) throw new Error('Wallet not connected. Connect your wallet to donate.');
 
-    const currency = state.currency || (state.walletType === 'freighter' ? 'XLM' : 'USDC');
-    const netLabel = state.walletType === 'freighter' ? 'Stellar' : 'Arbitrum Stylus';
     const txId = 'tx_' + Math.random().toString(36).substring(7);
     useTxStore.getState().addTransaction({
       id: txId,
-      title: `Donate ${amount} ${currency} (${netLabel})`,
+      title: `Donate ${amount} USDC (Arbitrum Stylus)`,
       status: 'pending',
       amount: amount.toString()
     });

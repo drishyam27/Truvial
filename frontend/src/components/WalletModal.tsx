@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useWalletStore, WalletNetwork, WalletType } from '../state/wallet';
+import { useWalletStore, WalletType } from '../state/wallet';
 import { ArbitrumService } from '../services/arbitrum';
-import { X, Check, Copy, ExternalLink, Shield, Award, User, Sparkles, LogOut, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { X, Check, Copy, Shield, Award, User, Sparkles, LogOut, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -27,21 +27,11 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
   const [connectingType, setConnectingType] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [hasFreighterInstalled, setHasFreighterInstalled] = useState(false);
   const [hasMetaMaskInstalled, setHasMetaMaskInstalled] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setHasMetaMaskInstalled(!!(window as any).ethereum);
-      setHasFreighterInstalled(!!(window as any).freighter);
-      
-      // Async check for freighter
-      import('@stellar/freighter-api')
-        .then((f) => f.isConnected())
-        .then((status) => {
-          if (status?.isConnected) setHasFreighterInstalled(true);
-        })
-        .catch(() => {});
     }
   }, [isOpen]);
 
@@ -51,9 +41,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
     setErrorMessage(null);
     setConnectingType(type);
     try {
-      if (type === 'freighter') {
-        await ArbitrumService.connectFreighter(selectedRole);
-      } else if (type === 'metamask') {
+      if (type === 'metamask') {
         await ArbitrumService.connectMetaMask(selectedRole);
       } else {
         await ArbitrumService.connectSimulated(selectedRole);
@@ -89,12 +77,12 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
         <div className="flex items-center justify-between pb-4 border-b border-hairline">
           <div>
             <h3 className="font-serif text-lg font-semibold text-ink">
-              {isConnected ? 'Wallet Connected' : 'Connect Wallet'}
+              {isConnected ? 'Wallet Connected' : 'Connect to Arbitrum'}
             </h3>
             <p className="font-sans text-xs text-mute mt-0.5">
               {isConnected 
                 ? 'Manage active account, role & network'
-                : 'Select your preferred Web3 provider or role'
+                : 'Select your preferred Arbitrum provider or demo role'
               }
             </p>
           </div>
@@ -112,19 +100,6 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
             <div className="flex-1">
               <span>{errorMessage}</span>
-              {errorMessage.includes('freighter.app') && (
-                <div className="mt-1.5">
-                  <a 
-                    href="https://www.freighter.app/" 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="inline-flex items-center space-x-1 font-semibold underline hover:text-ink"
-                  >
-                    <span>Download Freighter Extension</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -136,12 +111,12 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
             <div className="p-4 rounded-xl bg-surface-card border border-hairline space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-mute">
-                  Active Account
+                  Active EVM Account
                 </span>
                 <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent-green/10 text-accent-green border border-accent-green/20">
                   <span className="h-1.5 w-1.5 rounded-full bg-accent-green animate-pulse" />
                   <span>
-                    {walletType === 'freighter' ? 'Freighter (Stellar)' : walletType === 'metamask' ? 'MetaMask (EVM)' : 'Demo Profile'}
+                    {walletType === 'metamask' ? 'MetaMask (Injected)' : 'Demo Profile'}
                   </span>
                 </span>
               </div>
@@ -240,7 +215,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
                 <span className="text-[11px] font-mono uppercase tracking-wider text-mute">
                   1. Choose Initial Profile
                 </span>
-                <span className="text-[10px] text-mute">Configures test permissions</span>
+                <span className="text-[10px] text-mute">Role permissions</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <button
@@ -283,21 +258,21 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-mono uppercase tracking-wider text-mute">
-                  2. Select Wallet Provider
+                  2. Select Arbitrum Provider
                 </span>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {/* MetaMask / EVM */}
                 <button
                   onClick={() => handleConnect('metamask')}
                   disabled={connectingType !== null}
-                  className="w-full flex items-center justify-between p-3 rounded-xl border border-hairline bg-surface-card hover:bg-surface-elevated hover:border-hairline-strong text-left transition-all group"
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl border border-hairline bg-surface-card hover:bg-surface-elevated hover:border-hairline-strong text-left transition-all group"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="h-9 w-9 rounded-xl bg-[#F6851B]/15 border border-[#F6851B]/30 flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-xl bg-[#F6851B]/15 border border-[#F6851B]/30 flex items-center justify-center shrink-0">
                       {/* MetaMask Fox SVG */}
-                      <svg className="h-5 w-5" viewBox="0 0 318.6 318.6" fill="none">
+                      <svg className="h-6 w-6" viewBox="0 0 318.6 318.6" fill="none">
                         <path d="M274.1 35.5l-99.5 73.9L193 65.4z" fill="#E2761B" stroke="#E2761B" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M44.4 35.5l98.7 74.6-18.4-44.7z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M238.3 206.8l-26.6 40.9 57.6 15.8 16.5-56z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
@@ -311,15 +286,19 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
                     </div>
                     <div>
                       <div className="font-sans text-xs font-semibold text-ink group-hover:text-accent-orange transition-colors flex items-center space-x-1.5">
-                        <span>MetaMask</span>
-                        {hasMetaMaskInstalled && (
+                        <span>MetaMask & Injected EVM</span>
+                        {hasMetaMaskInstalled ? (
                           <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-accent-green/10 text-accent-green border border-accent-green/20">
                             Detected
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-accent-orange/10 text-accent-orange border border-accent-orange/20">
+                            Recommended
                           </span>
                         )}
                       </div>
                       <div className="font-sans text-[11px] text-mute">
-                        Arbitrum Sepolia & Nitro EVM
+                        Arbitrum Sepolia & Nitro Stylus EVM
                       </div>
                     </div>
                   </div>
@@ -331,67 +310,25 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => 
                   )}
                 </button>
 
-                {/* Freighter Wallet (Stellar) */}
-                <button
-                  onClick={() => handleConnect('freighter')}
-                  disabled={connectingType !== null}
-                  className="w-full flex items-center justify-between p-3 rounded-xl border border-hairline bg-surface-card hover:bg-surface-elevated hover:border-hairline-strong text-left transition-all group"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="h-9 w-9 rounded-xl bg-[#5C42FF]/15 border border-[#5C42FF]/30 flex items-center justify-center shrink-0">
-                      {/* Freighter Rocket / Stellar SVG */}
-                      <svg className="h-5 w-5 text-[#8875FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-                        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-                        <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
-                        <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="font-sans text-xs font-semibold text-ink group-hover:text-[#8875FF] transition-colors flex items-center space-x-1.5">
-                        <span>Freighter Wallet</span>
-                        {hasFreighterInstalled ? (
-                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-accent-green/10 text-accent-green border border-accent-green/20">
-                            Detected
-                          </span>
-                        ) : (
-                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-surface-elevated text-mute border border-hairline">
-                            Stellar
-                          </span>
-                        )}
-                      </div>
-                      <div className="font-sans text-[11px] text-mute">
-                        Stellar Network (XLM & Soroban)
-                      </div>
-                    </div>
-                  </div>
-
-                  {connectingType === 'freighter' ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-[#8875FF]" />
-                  ) : (
-                    <ArrowRight className="h-4 w-4 text-mute group-hover:text-ink group-hover:translate-x-0.5 transition-all" />
-                  )}
-                </button>
-
                 {/* Simulated Profile (Instant Demo) */}
                 <button
                   onClick={() => handleConnect('simulated')}
                   disabled={connectingType !== null}
-                  className="w-full flex items-center justify-between p-3 rounded-xl border border-hairline bg-surface-card hover:bg-surface-elevated hover:border-hairline-strong text-left transition-all group"
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl border border-hairline bg-surface-card hover:bg-surface-elevated hover:border-hairline-strong text-left transition-all group"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="h-9 w-9 rounded-xl bg-accent-orange/15 border border-accent-orange/30 flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-xl bg-accent-orange/15 border border-accent-orange/30 flex items-center justify-center shrink-0">
                       <Sparkles className="h-5 w-5 text-accent-orange" />
                     </div>
                     <div>
                       <div className="font-sans text-xs font-semibold text-ink group-hover:text-accent-orange transition-colors flex items-center space-x-1.5">
-                        <span>Instant Test Account</span>
+                        <span>Instant Demo Account</span>
                         <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-accent-orange/10 text-accent-orange border border-accent-orange/20">
-                          1-Click Demo
+                          1-Click
                         </span>
                       </div>
                       <div className="font-sans text-[11px] text-mute">
-                        Test without installing browser extensions
+                        Test without installing browser extension or testnet faucet
                       </div>
                     </div>
                   </div>
