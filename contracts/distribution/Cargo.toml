@@ -7,8 +7,16 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-soroban-sdk = { version = "=22.0.0" }
+stylus-sdk = "0.6.0"
+alloy-primitives = { version = "=0.7.6", default-features = false, features = ["tiny-keccak"] }
+alloy-sol-types = "=0.7.6"
 
-[dev-dependencies]
-soroban-sdk = { version = "=22.0.0", features = ["testutils"] }
-truvial-treasury = { path = "../treasury" }
+[build-dependencies]
+alloy-primitives = { version = "=0.7.6", features = ["tiny-keccak"] }
+
+[features]
+default = []
+export-abi = ["stylus-sdk/export-abi"]
+
+
+

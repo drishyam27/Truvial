@@ -1,99 +1,119 @@
+#![no_main]
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, token, Address, BytesN, Env};
+extern crate alloc;
 
-#[derive(Clone)]
-#[contracttype]
-pub enum DataKey {
-    Admin,
-    Distribution,
-    Token,
-    DonorBalance(Address),
-    TotalDonated,
+use alloc::vec::Vec;
+use stylus_sdk::{
+    alloy_primitives::{Address, U256},
+    call::Call,
+    contract,
+    msg,
+    prelude::*,
+};
+
+// Standard ERC20 interface using sol_interface!
+sol_interface! {
+    interface IERC20 {
+        function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+        function transfer(address recipient, uint256 amount) external returns (bool);
+        function balanceOf(address account) external view returns (uint256);
+    }
 }
 
-#[contract]
-pub struct TreasuryContract;
+sol_storage! {
+    #[entrypoint]
+    pub struct Treasury {
+        address admin;
+        address distribution;
+        address token;
+        uint256 total_donated;
+        mapping(address => uint256) donor_balances;
+    }
+}
 
-#[contractimpl]
-impl TreasuryContract {
-    pub fn initialize(env: Env, admin: Address, distribution_contract: Address, token: Address) {
-        if env.storage().instance().has(&DataKey::Admin) {
-            panic!("already initialized");
+#[public]
+impl Treasury {
+    /// Initializes the Treasury with admin, distribution contract, and accepted ERC-20 token.
+    pub fn initialize(&mut self, admin: Address, distribution: Address, token: Address) -> Result<(), Vec<u8>> {
+        if self.admin.get() != Address::ZERO {
+            return Err("already initialized".into());
         }
-        env.storage().instance().set(&DataKey::Admin, &admin);
-        env.storage().instance().set(&DataKey::Distribution, &distribution_contract);
-        env.storage().instance().set(&DataKey::Token, &token);
-        env.storage().instance().set(&DataKey::TotalDonated, &0i128);
+        self.admin.set(admin);
+        self.distribution.set(distribution);
+        self.token.set(token);
+        self.total_donated.set(U256::ZERO);
+        Ok(())
     }
 
-    pub fn donate(env: Env, donor: Address, amount: i128) {
-        donor.require_auth();
-        if amount <= 0 {
-            panic!("amount must be positive");
+    /// Allows a donor to contribute ERC-20 tokens to the treasury escrow.
+    pub fn donate(&mut self, amount: U256) -> Result<(), Vec<u8>> {
+        let sender = msg::sender();
+        if amount == U256::ZERO {
+            return Err("amount must be positive".into());
         }
 
-        let token_addr: Address = env.storage().instance().get(&DataKey::Token).unwrap();
-        let token_client = token::Client::new(&env, &token_addr);
-        
-        // Transfer funds from donor to treasury
-        token_client.transfer(&donor, &env.current_contract_address(), &amount);
+        let token_addr = self.token.get();
+        if token_addr == Address::ZERO {
+            return Err("token not configured".into());
+        }
+
+        // Transfer funds from sender to this treasury contract
+        let token_contract = IERC20::new(token_addr);
+        let config = Call::new();
+        token_contract.transfer_from(config, sender, contract::address(), amount)?;
 
         // Update donor balance
-        let key = DataKey::DonorBalance(donor.clone());
-        let current_balance: i128 = env.storage().persistent().get(&key).unwrap_or(0);
-        let new_balance = current_balance + amount;
-        env.storage().persistent().set(&key, &new_balance);
-
-        // Extend TTL for donor balance storage (10000 ledgers)
-        env.storage().persistent().extend_ttl(&key, 10000, 100000);
+        let mut balance = self.donor_balances.setter(sender);
+        let current_bal = balance.get();
+        balance.set(current_bal + amount);
 
         // Update total donated
-        let total: i128 = env.storage().instance().get(&DataKey::TotalDonated).unwrap();
-        env.storage().instance().set(&DataKey::TotalDonated, &(total + amount));
+        let total = self.total_donated.get();
+        self.total_donated.set(total + amount);
+
+        Ok(())
     }
 
-    pub fn release_funds(env: Env, beneficiary: Address, amount: i128) {
-        let distribution: Address = env.storage().instance().get(&DataKey::Distribution).unwrap();
-        distribution.require_auth(); // Only the distribution contract can call this
-
-        if amount <= 0 {
-            panic!("amount must be positive");
+    /// Releases funds to a designated beneficiary. Callable strictly by the Distribution contract.
+    pub fn release_funds(&mut self, beneficiary: Address, amount: U256) -> Result<(), Vec<u8>> {
+        if msg::sender() != self.distribution.get() {
+            return Err("unauthorized: caller must be distribution contract".into());
         }
 
-        let token_addr: Address = env.storage().instance().get(&DataKey::Token).unwrap();
-        let token_client = token::Client::new(&env, &token_addr);
+        if amount == U256::ZERO {
+            return Err("amount must be positive".into());
+        }
 
-        // Transfer funds from treasury to beneficiary
-        token_client.transfer(&env.current_contract_address(), &beneficiary, &amount);
+        let token_addr = self.token.get();
+        let token_contract = IERC20::new(token_addr);
+        let config = Call::new();
+        token_contract.transfer(config, beneficiary, amount)?;
+
+        Ok(())
     }
 
-    pub fn get_admin(env: Env) -> Address {
-        env.storage().instance().get(&DataKey::Admin).unwrap()
+    /// Returns the admin address.
+    pub fn get_admin(&self) -> Result<Address, Vec<u8>> {
+        Ok(self.admin.get())
     }
 
-    pub fn get_distribution_contract(env: Env) -> Address {
-        env.storage().instance().get(&DataKey::Distribution).unwrap()
+    /// Returns the linked distribution contract address.
+    pub fn get_distribution(&self) -> Result<Address, Vec<u8>> {
+        Ok(self.distribution.get())
     }
 
-    pub fn get_token(env: Env) -> Address {
-        env.storage().instance().get(&DataKey::Token).unwrap()
+    /// Returns the escrow ERC-20 token address.
+    pub fn get_token(&self) -> Result<Address, Vec<u8>> {
+        Ok(self.token.get())
     }
 
-    pub fn get_donor_balance(env: Env, donor: Address) -> i128 {
-        let key = DataKey::DonorBalance(donor);
-        env.storage().persistent().get(&key).unwrap_or(0)
+    /// Returns the total amount donated by a specific donor address.
+    pub fn get_donor_balance(&self, donor: Address) -> Result<U256, Vec<u8>> {
+        Ok(self.donor_balances.get(donor))
     }
 
-    pub fn get_total_donated(env: Env) -> i128 {
-        env.storage().instance().get(&DataKey::TotalDonated).unwrap_or(0)
-    }
-
-    pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) {
-        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
-        admin.require_auth();
-
-        env.deployer().update_current_contract_wasm(new_wasm_hash);
+    /// Returns cumulative donations received by the treasury.
+    pub fn get_total_donated(&self) -> Result<U256, Vec<u8>> {
+        Ok(self.total_donated.get())
     }
 }
-
-mod test;

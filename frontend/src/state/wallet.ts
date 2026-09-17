@@ -1,10 +1,9 @@
 import { create } from 'zustand';
 
 export enum WalletNetwork {
-  PUBLIC = 'PUBLIC',
-  TESTNET = 'TESTNET',
-  FUTURENET = 'FUTURENET',
-  STANDALONE = 'STANDALONE'
+  ARBITRUM_SEPOLIA = 'Arbitrum Sepolia (421614)',
+  ARBITRUM_ONE = 'Arbitrum One (42161)',
+  LOCAL_NITRO = 'Arbitrum Nitro Local (8547)'
 }
 
 export interface WalletState {
@@ -12,6 +11,7 @@ export interface WalletState {
   isConnected: boolean;
   network: WalletNetwork;
   balance: string;
+  currency: string;
   userRole: 'admin' | 'donor' | 'beneficiary' | 'none';
   
   // Actions
@@ -25,15 +25,16 @@ export interface WalletState {
 export const useWalletStore = create<WalletState>((set) => ({
   publicKey: null,
   isConnected: false,
-  network: WalletNetwork.TESTNET,
+  network: WalletNetwork.ARBITRUM_SEPOLIA,
   balance: '0.00',
+  currency: 'USDC',
   userRole: 'none',
 
   connect: (publicKey, role = 'donor') => set({
     publicKey,
     isConnected: true,
     userRole: role,
-    balance: role === 'admin' ? '12500.50' : role === 'donor' ? '850.25' : '150.00'
+    balance: role === 'admin' ? '12,500.00' : role === 'donor' ? '1,250.00' : '250.00'
   }),
   disconnect: () => set({
     publicKey: null,
@@ -44,7 +45,8 @@ export const useWalletStore = create<WalletState>((set) => ({
   setNetwork: (network) => set({ network }),
   setRole: (userRole) => set({ 
     userRole,
-    balance: userRole === 'admin' ? '12500.50' : userRole === 'donor' ? '850.25' : '150.00'
+    balance: userRole === 'admin' ? '12,500.00' : userRole === 'donor' ? '1,250.00' : '250.00'
   }),
   updateBalance: (balance) => set({ balance })
 }));
+

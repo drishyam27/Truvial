@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTxStore, Transaction } from '../../state/tx';
-import { StellarService } from '../../services/stellar';
+import { ArbitrumService } from '../../services/arbitrum';
 import { RefreshCw, CheckCircle, XCircle, Clock, ExternalLink, Trash2, RotateCcw } from 'lucide-react';
 
 export default function TxCenterPage() {
@@ -52,18 +52,16 @@ export default function TxCenterPage() {
   const handleRetry = async (tx: Transaction) => {
     setRetryingId(tx.id);
     try {
-      // Simulate/trigger a new donation or call based on title
       if (tx.amount) {
-        await StellarService.donate(Number(tx.amount));
+        await ArbitrumService.donate(Number(tx.amount));
       } else {
-        // Simple fallback simulation
         updateTransaction(tx.id, { status: 'pending', error: undefined });
         await new Promise((resolve) => setTimeout(resolve, 1000));
         updateTransaction(tx.id, { status: 'processing' });
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        await new Promise((resolve) => setTimeout(resolve, 1200));
         updateTransaction(tx.id, { 
           status: 'confirmed', 
-          hash: '0x' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
+          hash: '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')
         });
       }
     } catch (err: any) {
@@ -80,7 +78,7 @@ export default function TxCenterPage() {
         <div>
           <h1 className="font-serif text-4xl text-ink font-normal">Transaction Center</h1>
           <p className="font-sans text-sm text-charcoal mt-1">
-            Real-time Soroban ledger transaction monitor and error handler.
+            Real-time Arbitrum Sepolia Nitro ledger transaction monitor and error handler.
           </p>
         </div>
         {transactions.length > 0 && (
@@ -134,7 +132,7 @@ export default function TxCenterPage() {
                   <div className="flex items-center space-x-2">
                     <span className="font-sans text-[11px] text-mute">Hash:</span>
                     <a
-                      href={`https://stellar.expert/explorer/testnet/tx/${tx.hash}`}
+                      href={`https://sepolia.arbiscan.io/tx/${tx.hash}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center space-x-1 font-mono text-[11px] text-accent-blue hover:underline"
@@ -144,6 +142,7 @@ export default function TxCenterPage() {
                     </a>
                   </div>
                 )}
+
 
                 {tx.error && (
                   <div className="rounded bg-accent-red-glow/10 border border-accent-red/20 px-3 py-1.5 font-mono text-xs text-accent-red max-w-xl">

@@ -78,7 +78,7 @@ export default function ActivityFeedPage() {
                   </p>
                   {activity.amount && (
                     <div className="font-mono text-xs text-mute mt-1.5">
-                      Value: <span className="text-ink font-semibold">{activity.amount.toLocaleString()} XLM</span>
+                      Value: <span className="text-ink font-semibold">{activity.amount.toLocaleString()} USDC</span>
                     </div>
                   )}
                 </div>
@@ -92,7 +92,7 @@ export default function ActivityFeedPage() {
                 </div>
                 {activity.hash && (
                   <a
-                    href={`https://stellar.expert/explorer/testnet/tx/${activity.hash}`}
+                    href={`https://sepolia.arbiscan.io/tx/${activity.hash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center space-x-1 font-mono text-[11px] text-accent-blue hover:underline mt-1"

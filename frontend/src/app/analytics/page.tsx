@@ -172,7 +172,7 @@ export default function AnalyticsPage() {
                   <div className="flex justify-between text-xs font-sans">
                     <span className="text-ink font-medium">{item.name}</span>
                     <span className="text-mute font-mono">
-                      {item.Allocated.toLocaleString()} / {item.Budget.toLocaleString()} XLM
+                      {item.Allocated.toLocaleString()} / {item.Budget.toLocaleString()} USDC
                     </span>
                   </div>
                   <div className="h-2 w-full bg-surface-deep rounded-full overflow-hidden flex space-x-1">
@@ -253,12 +253,12 @@ export default function AnalyticsPage() {
               </h3>
             </div>
             <p className="font-sans text-sm text-charcoal leading-relaxed">
-              Every data point rendered above correlates directly with Soroban persistent events on the Stellar Testnet ledger. Since values are loaded from the smart contract storage indices, this dashboard provides a real-time, mathematically verifiable view of charity operation health.
+              Every data point rendered above correlates directly with Arbitrum Stylus contract state on the Arbitrum Sepolia Nitro ledger. Since values are loaded from the WebAssembly smart contract storage slots, this dashboard provides a real-time, mathematically verifiable view of charity operation health.
             </p>
           </div>
           <div className="border-t border-hairline/50 pt-4 mt-6 flex justify-between font-mono text-[10px] text-mute">
             <span>Audit status: Pass</span>
-            <span>Ledger Index: #56812</span>
+            <span>Chain ID: #421614</span>
           </div>
         </div>
       </div>

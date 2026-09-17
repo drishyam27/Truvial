@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useWalletStore } from '../../state/wallet';
 import { useProjectsStore, Project, Milestone } from '../../state/projects';
-import { StellarService } from '../../services/stellar';
+import { ArbitrumService } from '../../services/arbitrum';
 import { Wallet, Shield, PlusCircle, Check, Award, ArrowUpRight, Coins, ListTodo } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -39,9 +39,9 @@ export default function DashboardPage() {
     setIsDonating(true);
     setStatusMessage('');
     try {
-      await StellarService.donate(Number(donateAmount));
+      await ArbitrumService.donate(Number(donateAmount));
       setDonateAmount('');
-      setStatusMessage('Donation successfully processed!');
+      setStatusMessage('Donation successfully processed on Arbitrum Stylus!');
     } catch (err: any) {
       setStatusMessage(`Error: ${err.message}`);
     } finally {
@@ -58,10 +58,10 @@ export default function DashboardPage() {
       // Whitelist beneficiary first automatically in mock mode for UX flow
       useProjectsStore.getState().addActivity({
         type: 'beneficiary_added',
-        details: `Beneficiary ${newProjBeneficiary.slice(0, 8)}... whitelisted by Admin.`
+        details: `Beneficiary ${newProjBeneficiary.slice(0, 8)}... whitelisted by Admin on Arbitrum.`
       });
       
-      await StellarService.createProject(
+      await ArbitrumService.createProject(
         newProjTitle,
         newProjDesc,
         newProjBeneficiary,
@@ -71,13 +71,14 @@ export default function DashboardPage() {
       setNewProjDesc('');
       setNewProjBeneficiary('');
       setNewProjBudget('');
-      setStatusMessage('Project successfully created!');
+      setStatusMessage('Project successfully created on Arbitrum Sepolia!');
     } catch (err: any) {
       setStatusMessage(`Error: ${err.message}`);
     } finally {
       setIsAdminCreating(false);
     }
   };
+
 
   const handleAddMilestone = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +92,7 @@ export default function DashboardPage() {
       );
       useProjectsStore.getState().addActivity({
         type: 'milestone_approved',
-        details: `New milestone "${newMilestoneTitle}" added to project "${selectedProject.title}" with amount ${Number(newMilestoneAmount).toLocaleString()} XLM.`,
+        details: `New milestone "${newMilestoneTitle}" added to project "${selectedProject.title}" with amount ${Number(newMilestoneAmount).toLocaleString()} USDC.`,
         amount: Number(newMilestoneAmount)
       });
       // Refresh local selection
@@ -110,8 +111,8 @@ export default function DashboardPage() {
 
   const handleApproveMilestone = async (projId: number, mId: number) => {
     try {
-      await StellarService.approveMilestone(projId, mId);
-      setStatusMessage('Milestone approved! Ready for payout.');
+      await ArbitrumService.approveMilestone(projId, mId);
+      setStatusMessage('Milestone approved on Arbitrum! Ready for payout.');
       if (selectedProject) {
         const updated = useProjectsStore.getState().projects.find(p => p.id === selectedProject.id);
         if (updated) setSelectedProject(updated);
@@ -123,8 +124,8 @@ export default function DashboardPage() {
 
   const handleReleaseFunds = async (projId: number, mId: number) => {
     try {
-      await StellarService.releaseMilestoneFunds(projId, mId);
-      setStatusMessage('Funds successfully released to beneficiary!');
+      await ArbitrumService.releaseMilestoneFunds(projId, mId);
+      setStatusMessage('Funds successfully released to beneficiary via Stylus cross-contract call!');
       if (selectedProject) {
         const updated = useProjectsStore.getState().projects.find(p => p.id === selectedProject.id);
         if (updated) setSelectedProject(updated);
@@ -133,6 +134,7 @@ export default function DashboardPage() {
       alert(err.message);
     }
   };
+
 
   if (!isConnected) {
     return (
@@ -170,8 +172,8 @@ export default function DashboardPage() {
             <span>Treasury Pool</span>
             <Coins className="h-4 w-4 text-accent-orange" />
           </div>
-          <div className="font-serif text-3xl text-ink">{totalTreasuryBalance.toLocaleString()} XLM</div>
-          <span className="text-[11px] text-charcoal font-sans">Locked in Treasury Smart Contract</span>
+          <div className="font-serif text-3xl text-ink">{totalTreasuryBalance.toLocaleString()} USDC</div>
+          <span className="text-[11px] text-charcoal font-sans">Arbitrum Stylus Escrow Contract</span>
         </div>
 
         <div className="rounded-lg border border-hairline bg-surface-card p-6">
@@ -179,7 +181,7 @@ export default function DashboardPage() {
             <span>Personal Balance</span>
             <Wallet className="h-4 w-4 text-accent-blue" />
           </div>
-          <div className="font-serif text-3xl text-ink">{parseFloat(balance).toLocaleString()} XLM</div>
+          <div className="font-serif text-3xl text-ink">{parseFloat(balance).toLocaleString()} USDC</div>
           <span className="text-[11px] text-charcoal font-sans truncate block">{publicKey}</span>
         </div>
 
@@ -189,7 +191,7 @@ export default function DashboardPage() {
             <ListTodo className="h-4 w-4 text-accent-green" />
           </div>
           <div className="font-serif text-3xl text-ink">{projects.length}</div>
-          <span className="text-[11px] text-charcoal font-sans">Milestone-linked contracts</span>
+          <span className="text-[11px] text-charcoal font-sans">Arbitrum Stylus initiatives</span>
         </div>
       </div>
 
@@ -214,13 +216,14 @@ export default function DashboardPage() {
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-sans text-lg font-semibold text-ink">{project.title}</h3>
                   <span className="font-mono text-xs text-mute bg-canvas px-2.5 py-1 rounded border border-hairline">
-                    Budget: {project.totalBudget.toLocaleString()} XLM
+                    Budget: {project.totalBudget.toLocaleString()} USDC
                   </span>
                 </div>
                 <p className="font-sans text-sm text-charcoal leading-relaxed mb-4">{project.description}</p>
                 <div className="flex justify-between items-center text-xs font-mono text-mute border-t border-hairline/50 pt-4">
                   <span>Beneficiary: {project.beneficiary.slice(0, 12)}...</span>
                   <span>Milestones: {project.milestones.length}</span>
+
                 </div>
               </div>
             ))}
@@ -240,7 +243,7 @@ export default function DashboardPage() {
               <form onSubmit={handleDonate} className="space-y-4">
                 <div>
                   <label className="block text-xs text-mute font-sans font-semibold uppercase tracking-wider mb-2">
-                    Amount (XLM)
+                    Amount (USDC)
                   </label>
                   <input
                     type="number"
@@ -248,27 +251,25 @@ export default function DashboardPage() {
                     onChange={(e) => setDonateAmount(e.target.value)}
                     placeholder="e.g. 100"
                     disabled={isDonating}
-                    required
-                    className="w-full h-10 rounded border border-hairline-strong bg-canvas px-4 font-mono text-sm text-ink focus:outline-none focus:border-ink"
+                    className="w-full h-10 rounded border border-hairline-strong bg-canvas px-3 text-sm text-ink focus:outline-none focus:border-ink font-mono"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={isDonating}
-                  className="w-full h-10 flex items-center justify-center rounded bg-primary-white font-sans text-xs font-bold text-primary-on transition-colors hover:bg-white/90 disabled:opacity-50"
+                  className="w-full h-10 flex items-center justify-center space-x-2 rounded bg-primary-white text-xs font-bold text-primary-on hover:bg-white/90 transition-opacity disabled:opacity-50"
                 >
-                  {isDonating ? 'Signing Transaction...' : 'Donate Funds'}
+                  {isDonating ? 'Escrowing Funds on Arbitrum...' : 'Donate USDC'}
                 </button>
               </form>
             </div>
           )}
 
-          {/* ADMIN PANELS */}
+          {/* ADMIN PANEL */}
           {userRole === 'admin' && (
-            <div className="space-y-8">
-              {/* Project Creator */}
-              <div className="rounded-lg border border-hairline bg-surface-card p-6 space-y-6">
-                <h3 className="font-serif text-xl text-ink font-normal">Launch Initiative</h3>
+            <div className="space-y-6">
+              <div className="rounded-lg border border-hairline bg-surface-card p-6 space-y-4">
+                <h3 className="font-serif text-xl text-ink font-normal">New Charity Project</h3>
                 <form onSubmit={handleCreateProject} className="space-y-4">
                   <div>
                     <label className="block text-xs text-mute font-sans uppercase mb-1.5">Project Title</label>
@@ -276,8 +277,8 @@ export default function DashboardPage() {
                       type="text"
                       value={newProjTitle}
                       onChange={(e) => setNewProjTitle(e.target.value)}
-                      placeholder="e.g. Solar Upgrades"
-                      className="w-full h-9 rounded border border-hairline-strong bg-canvas px-3 text-xs text-ink focus:outline-none focus:border-ink"
+                      placeholder="e.g. Solar Power for Classrooms"
+                      className="w-full h-9 rounded border border-hairline-strong bg-canvas px-3 text-xs text-ink focus:outline-none"
                       required
                     />
                   </div>
@@ -286,30 +287,30 @@ export default function DashboardPage() {
                     <textarea
                       value={newProjDesc}
                       onChange={(e) => setNewProjDesc(e.target.value)}
-                      placeholder="Project details..."
+                      placeholder="Details on the initiative and impact..."
                       rows={3}
                       className="w-full p-3 rounded border border-hairline-strong bg-canvas text-xs text-ink focus:outline-none focus:border-ink resize-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-mute font-sans uppercase mb-1.5">Beneficiary PublicKey</label>
+                    <label className="block text-xs text-mute font-sans uppercase mb-1.5">Beneficiary EVM Address</label>
                     <input
                       type="text"
                       value={newProjBeneficiary}
                       onChange={(e) => setNewProjBeneficiary(e.target.value)}
-                      placeholder="GDW..."
-                      className="w-full h-9 rounded border border-hairline-strong bg-canvas px-3 text-xs text-ink focus:outline-none"
+                      placeholder="0x..."
+                      className="w-full h-9 rounded border border-hairline-strong bg-canvas px-3 text-xs text-ink focus:outline-none font-mono"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-mute font-sans uppercase mb-1.5">Total Budget (XLM)</label>
+                    <label className="block text-xs text-mute font-sans uppercase mb-1.5">Total Budget (USDC)</label>
                     <input
                       type="number"
                       value={newProjBudget}
                       onChange={(e) => setNewProjBudget(e.target.value)}
                       placeholder="e.g. 5000"
-                      className="w-full h-9 rounded border border-hairline-strong bg-canvas px-3 text-xs text-ink focus:outline-none"
+                      className="w-full h-9 rounded border border-hairline-strong bg-canvas px-3 text-xs text-ink focus:outline-none font-mono"
                       required
                     />
                   </div>
@@ -329,7 +330,7 @@ export default function DashboardPage() {
             <div className="rounded-lg border border-hairline bg-surface-card p-6 space-y-6">
               <h3 className="font-serif text-xl text-ink font-normal">Beneficiary Portal</h3>
               <p className="font-sans text-xs text-charcoal">
-                You are registered as a receiver of milestone payouts. Coordinate with admins to approve milestones and release locked funds.
+                You are registered as a receiver of milestone payouts on Arbitrum. Coordinate with admins to verify milestones and trigger escrow releases.
               </p>
               <div className="rounded border border-hairline bg-surface-elevated p-4">
                 <span className="text-[10px] text-mute uppercase font-mono block mb-1">Your Key</span>
@@ -360,10 +361,10 @@ export default function DashboardPage() {
                 />
                 <input
                   type="number"
-                  placeholder="Amount (XLM)"
+                  placeholder="Amount (USDC)"
                   value={newMilestoneAmount}
                   onChange={(e) => setNewMilestoneAmount(e.target.value)}
-                  className="h-8 w-24 rounded border border-hairline-strong bg-surface-card px-3 text-xs text-ink focus:outline-none"
+                  className="h-8 w-28 rounded border border-hairline-strong bg-surface-card px-3 text-xs text-ink focus:outline-none font-mono"
                   required
                 />
                 <button
@@ -397,7 +398,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   <h4 className="font-sans text-[15px] font-semibold text-ink mb-2">{milestone.title}</h4>
-                  <p className="font-serif text-lg text-ink font-normal">{milestone.amount.toLocaleString()} XLM</p>
+                  <p className="font-serif text-lg text-ink font-normal">{milestone.amount.toLocaleString()} USDC</p>
                 </div>
 
                 {/* Admin Actions */}

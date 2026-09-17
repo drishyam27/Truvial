@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useWalletStore } from '../state/wallet';
 import { useTxStore } from '../state/tx';
-import { StellarService } from '../services/stellar';
+import { ArbitrumService } from '../services/arbitrum';
 import { Wallet, Menu, X, Shield, Award, User, RefreshCw, Copy, Check } from 'lucide-react';
 
 export default function Navbar() {
@@ -45,12 +45,13 @@ export default function Navbar() {
 
   const handleConnect = async (role: 'admin' | 'donor' | 'beneficiary') => {
     try {
-      await StellarService.connectWallet(role);
+      await ArbitrumService.connectWallet(role);
       setRoleSelectOpen(false);
     } catch (e: any) {
       alert(e.message);
     }
   };
+
 
   return (
     <nav className="sticky top-0 z-50 h-16 w-full border-b border-hairline bg-canvas/30 backdrop-blur-md">

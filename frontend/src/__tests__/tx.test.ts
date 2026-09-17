@@ -56,7 +56,7 @@ describe('useTxStore unit tests', () => {
       status: 'pending'
     });
 
-    const errorMsg = 'Stellar Testnet node timeout';
+    const errorMsg = 'Arbitrum Sepolia node timeout';
     useTxStore.getState().updateTransaction('tx_3', { status: 'failed', error: errorMsg });
     
     const state = useTxStore.getState();

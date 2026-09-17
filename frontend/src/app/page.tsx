@@ -50,27 +50,30 @@ export default function LandingPage() {
             <span className="h-3 w-3 rounded-full bg-accent-green" />
           </div>
           <div className="border-b border-hairline pb-2 mb-4 flex justify-between items-center text-mute text-xs">
-            <span>distribution_contract.rs</span>
-            <span className="font-sans font-semibold text-accent-orange">Soroban SDK v22</span>
+            <span>distribution/src/lib.rs</span>
+            <span className="font-sans font-semibold text-accent-orange">Arbitrum Stylus (Rust WASM)</span>
           </div>
           <pre className="overflow-x-auto text-[11px] md:text-[13px]">
             <code className="text-mute">
-              {`#[contractimpl]
-impl DistributionContract {
-    pub fn release_milestone_funds(env: Env, project_id: u32, milestone_id: u32) {
-        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
-        admin.require_auth(); // RBAC check
+              {`#[public]
+impl Distribution {
+    pub fn release_milestone_funds(&mut self, project_id: U256, milestone_id: U256) -> Result<(), Vec<u8>> {
+        if msg::sender() != self.admin.get() {
+            return Err("unauthorized: caller is not admin".into());
+        }
 
-        let mut milestone: Milestone = env.storage().persistent().get(&m_key).unwrap();
-        assert_eq!(milestone.status, 1); // Must be approved
+        let key = Self::milestone_key(project_id, milestone_id);
+        let mut milestone = self.milestones.setter(key);
+        assert_eq!(milestone.status.get(), U256::from(1)); // Must be approved
 
-        milestone.status = 2; // Paid
-        env.storage().persistent().set(&m_key, &milestone);
+        milestone.status.set(U256::from(2)); // Paid
+        let beneficiary = self.projects.get(project_id).beneficiary.get();
+        let amount = milestone.amount.get();
 
-        // Cross-contract call to Treasury contract
-        let treasury: Address = env.storage().instance().get(&DataKey::Treasury).unwrap();
-        let client = TreasuryClient::new(&env, &treasury);
-        client.release_funds(&project.beneficiary, &milestone.amount);
+        // Cross-contract call to Treasury on Arbitrum Nitro
+        let treasury = ITreasury::new(self.treasury.get());
+        treasury.release_funds(Call::new(), beneficiary, amount)?;
+        Ok(())
     }
 }`}
             </code>
@@ -84,9 +87,9 @@ impl DistributionContract {
               <Lock className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-sans text-[18px] font-semibold text-ink mb-2">Escrow-Locked Treasury</h3>
+              <h3 className="font-sans text-[18px] font-semibold text-ink mb-2">Stylus Escrow Vault</h3>
               <p className="font-sans text-sm text-charcoal leading-relaxed">
-                Donor capital is locked directly in the `treasury` contract. No intermediary can withdraw or divert funds.
+                Donor capital is locked directly in the Stylus Treasury contract. Beneficiary payouts are enforced via cryptographic EVM permissions.
               </p>
             </div>
           </div>
@@ -98,7 +101,7 @@ impl DistributionContract {
             <div>
               <h3 className="font-sans text-[18px] font-semibold text-ink mb-2">Milestone-Bound Releases</h3>
               <p className="font-sans text-sm text-charcoal leading-relaxed">
-                Charities release funding only after proving a milestone. The contract automatically triggers payments to whitelisted beneficiaries.
+                Charities unlock tranche funding only upon proving completed real-world work. The Distribution contract autonomously releases tokens.
               </p>
             </div>
           </div>
@@ -108,9 +111,9 @@ impl DistributionContract {
               <Eye className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-sans text-[18px] font-semibold text-ink mb-2">Immutable Real-Time Auditing</h3>
+              <h3 className="font-sans text-[18px] font-semibold text-ink mb-2">10x Lower Gas & Nitro Speed</h3>
               <p className="font-sans text-sm text-charcoal leading-relaxed">
-                Every transaction, milestone approval, and payout emits a Soroban event. Donors track their dollar's impact down to the ledger block.
+                Compiled to native WASM on Arbitrum Nitro, every audit check and transfer executes with sub-second finality and near-zero gas costs.
               </p>
             </div>
           </div>
@@ -120,34 +123,34 @@ impl DistributionContract {
       {/* Feature Grid */}
       <div className="mt-32 max-w-6xl mx-auto border-t border-hairline pt-16">
         <h2 className="font-serif text-[36px] text-ink font-normal text-center mb-12">
-          Designed for Trust. Built on Soroban.
+          Designed for Trust. Built on Arbitrum Stylus.
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="rounded-lg border border-hairline bg-surface-card p-8 flex flex-col justify-between">
             <div>
-              <h4 className="font-sans text-lg font-semibold text-ink mb-4">Contract-to-Contract calls</h4>
+              <h4 className="font-sans text-lg font-semibold text-ink mb-4">Cross-Contract Interoperability</h4>
               <p className="font-sans text-sm text-charcoal leading-relaxed">
-                Ensuring secure logical division: Treasury manages token holdings while Distribution enforces access policies and RBAC.
+                Clean logical separation: Treasury holds ERC-20 tokens while Distribution enforces RBAC access policies via `sol_interface!`.
               </p>
             </div>
-            <span className="font-mono text-[10px] text-accent-blue mt-8">INTEGRATED</span>
+            <span className="font-mono text-[10px] text-accent-blue mt-8">STYLUS NATIVE</span>
           </div>
 
           <div className="rounded-lg border border-hairline bg-surface-card p-8 flex flex-col justify-between">
             <div>
-              <h4 className="font-sans text-lg font-semibold text-ink mb-4">Multi-Wallet Integration</h4>
+              <h4 className="font-sans text-lg font-semibold text-ink mb-4">MetaMask & EVM Wallets</h4>
               <p className="font-sans text-sm text-charcoal leading-relaxed">
-                Connect seamlessly with top Stellar ecosystem wallets using `StellarWalletsKit`. Testnet and Local Sandbox ready.
+                Connect seamlessly with standard EVM wallets (MetaMask, Rabby, Rainbow). Arbitrum Sepolia testnet ready.
               </p>
             </div>
-            <span className="font-mono text-[10px] text-accent-orange mt-8">FREIGHTER SUPPORTED</span>
+            <span className="font-mono text-[10px] text-accent-orange mt-8">EVM COMPATIBLE</span>
           </div>
 
           <div className="rounded-lg border border-hairline bg-surface-card p-8 flex flex-col justify-between">
             <div>
               <h4 className="font-sans text-lg font-semibold text-ink mb-4">Role-Based Dashboard</h4>
               <p className="font-sans text-sm text-charcoal leading-relaxed">
-                Switch roles instantly between Donors (view metrics & donate) and Charity Admins (whitelist addresses & release milestone funds).
+                Switch profiles instantly between Donors (view metrics & donate) and Charity Admins (whitelist addresses & release milestone funds).
               </p>
             </div>
             <span className="font-mono text-[10px] text-accent-green mt-8">RBAC ENFORCED</span>

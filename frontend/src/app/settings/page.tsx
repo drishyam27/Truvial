@@ -6,9 +6,9 @@ import { Shield, Network, Palette, Database } from 'lucide-react';
 
 export default function SettingsPage() {
   const { userRole, setRole, network, setNetwork } = useWalletStore();
-  const [rpcUrl, setRpcUrl] = useState('https://soroban-testnet.stellar.org');
-  const [treasuryAddr, setTreasuryAddr] = useState('CDDONORSECURETREASURY777KEY');
-  const [distributionAddr, setDistributionAddr] = useState('CDDISTRIBUTIONRBACPAYOUTS777KEY');
+  const [rpcUrl, setRpcUrl] = useState('https://sepolia-rollup.arbitrum.io/rpc');
+  const [treasuryAddr, setTreasuryAddr] = useState('0x38Fe48A7740eE7005118742A9e89d8708C36De76');
+  const [distributionAddr, setDistributionAddr] = useState('0x81De98877B5B6E47814b7eBE63B2d8d1C0e26B29');
   const [accentColor, setAccentColor] = useState<'orange' | 'blue' | 'green' | 'red'>('orange');
   const [isSaved, setIsSaved] = useState(false);
 
@@ -25,7 +25,7 @@ export default function SettingsPage() {
         <div>
           <h1 className="font-serif text-4xl text-ink font-normal">Settings</h1>
           <p className="font-sans text-sm text-charcoal mt-1">
-            Configure Stellar/Soroban RPC parameters and client preferences.
+            Configure Arbitrum RPC parameters and Stylus contract preferences.
           </p>
         </div>
         {isSaved && (
@@ -72,12 +72,12 @@ export default function SettingsPage() {
         <div className="rounded-lg border border-hairline bg-surface-card p-6 space-y-6">
           <div className="flex items-center space-x-2">
             <Shield className="h-5 w-5 text-accent-blue" />
-            <h3 className="font-serif text-xl text-ink font-normal">Contract Deployments</h3>
+            <h3 className="font-serif text-xl text-ink font-normal">Stylus Deployments</h3>
           </div>
           <div className="space-y-4">
             <div>
               <label className="block text-xs text-mute font-sans font-semibold uppercase tracking-wider mb-2">
-                Treasury Contract Address
+                Stylus Treasury Contract Address
               </label>
               <input
                 type="text"
@@ -88,7 +88,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <label className="block text-xs text-mute font-sans font-semibold uppercase tracking-wider mb-2">
-                Distribution Contract Address
+                Stylus Distribution Contract Address
               </label>
               <input
                 type="text"
@@ -100,11 +100,11 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Section 3: Soroban RPC Endpoint */}
+        {/* Section 3: Arbitrum RPC Endpoint */}
         <div className="rounded-lg border border-hairline bg-surface-card p-6 space-y-6">
           <div className="flex items-center space-x-2">
             <Network className="h-5 w-5 text-accent-green" />
-            <h3 className="font-serif text-xl text-ink font-normal">Soroban Network Configuration</h3>
+            <h3 className="font-serif text-xl text-ink font-normal">Arbitrum Network Configuration</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -113,7 +113,7 @@ export default function SettingsPage() {
                 type="url"
                 value={rpcUrl}
                 onChange={(e) => setRpcUrl(e.target.value)}
-                className="w-full h-9 rounded border border-hairline-strong bg-canvas px-3 text-xs text-ink focus:outline-none"
+                className="w-full h-9 rounded border border-hairline-strong bg-canvas px-3 text-xs text-ink focus:outline-none font-mono"
               />
             </div>
             <div>
@@ -123,13 +123,14 @@ export default function SettingsPage() {
                 onChange={(e) => setNetwork(e.target.value as WalletNetwork)}
                 className="w-full h-9 rounded border border-hairline-strong bg-canvas px-3 text-xs text-ink focus:outline-none"
               >
-                <option value={WalletNetwork.TESTNET}>Stellar Testnet</option>
-                <option value={WalletNetwork.PUBLIC}>Stellar Public Mainnet</option>
-                <option value={WalletNetwork.STANDALONE}>Local Standalone Sandbox</option>
+                <option value={WalletNetwork.ARBITRUM_SEPOLIA}>Arbitrum Sepolia (421614)</option>
+                <option value={WalletNetwork.ARBITRUM_ONE}>Arbitrum One (42161)</option>
+                <option value={WalletNetwork.LOCAL_NITRO}>Arbitrum Nitro Local (8547)</option>
               </select>
             </div>
           </div>
         </div>
+
 
         {/* Section 4: Signature Accent Glow Theme */}
         <div className="rounded-lg border border-hairline bg-surface-card p-6 space-y-6">
