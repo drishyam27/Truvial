@@ -27,55 +27,127 @@ export class ArbitrumService {
     return '0x' + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
   }
 
-  // Connects wallet: uses window.ethereum (MetaMask, Rabby, Coinbase) or test profile
-  static async connectWallet(role: 'admin' | 'donor' | 'beneficiary' = 'donor'): Promise<string> {
+  // Connects via MetaMask or Injected EVM Wallet (Arbitrum Sepolia)
+  static async connectMetaMask(role: 'admin' | 'donor' | 'beneficiary' = 'donor'): Promise<string> {
+    if (typeof window === 'undefined' || !(window as any).ethereum) {
+      throw new Error('MetaMask is not detected. Please install the MetaMask browser extension or select another connection method.');
+    }
+
+    const ethereum = (window as any).ethereum;
     try {
-      if (typeof window !== 'undefined' && (window as any).ethereum) {
-        try {
-          const ethereum = (window as any).ethereum;
-          const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-          if (accounts && accounts.length > 0) {
-            const userAddress = accounts[0];
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No EVM account authorized');
+      }
+      const userAddress = accounts[0];
 
-            // Request switch to Arbitrum Sepolia
-            try {
-              await ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: ARBITRUM_SEPOLIA_CONFIG.chainId }],
-              });
-            } catch (switchError: any) {
-              // This error code indicates that the chain has not been added to MetaMask.
-              if (switchError.code === 4902) {
-                await ethereum.request({
-                  method: 'wallet_addEthereumChain',
-                  params: [ARBITRUM_SEPOLIA_CONFIG],
-                });
-              }
-            }
-
-            useWalletStore.getState().connect(userAddress, role);
-            return userAddress;
-          }
-        } catch (web3Err) {
-          console.warn('Injected web3 connection rejected or unavailable, falling back to simulated EVM profile:', web3Err);
+      // Request switch to Arbitrum Sepolia
+      try {
+        await ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: ARBITRUM_SEPOLIA_CONFIG.chainId }],
+        });
+      } catch (switchError: any) {
+        if (switchError.code === 4902) {
+          await ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [ARBITRUM_SEPOLIA_CONFIG],
+          });
         }
       }
 
-      // Fallback simulated EVM profile for seamless demo/testing
-      const mockProfiles: Record<'admin' | 'donor' | 'beneficiary', string> = {
-        admin: '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
-        donor: '0x2546BcD3c84621e976D8185a91A922aE77ECEc30',
-        beneficiary: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F'
-      };
-
-      const address = mockProfiles[role];
-      await delay(300);
-      useWalletStore.getState().connect(address, role);
-      return address;
-    } catch (error: any) {
-      console.error('Wallet connection failed:', error);
-      throw new Error(error?.message || 'Wallet connection failed. Please ensure an EVM wallet is installed.');
+      useWalletStore.getState().connect(userAddress, role, 'metamask', WalletNetwork.ARBITRUM_SEPOLIA, 'USDC');
+      return userAddress;
+    } catch (err: any) {
+      console.error('MetaMask connection failed:', err);
+      throw new Error(err?.message || 'MetaMask connection rejected');
     }
+  }
+
+  // Connects via Freighter Wallet (Stellar Network)
+  static async connectFreighter(role: 'admin' | 'donor' | 'beneficiary' = 'donor'): Promise<string> {
+    if (typeof window === 'undefined') {
+      throw new Error('Freighter wallet can only be connected in browser environments.');
+    }
+
+    try {
+      const { isConnected, requestAccess, getAddress } = await import('@stellar/freighter-api');
+      
+      const conn = await isConnected();
+      const hasFreighter = conn?.isConnected || !!(window as any).freighter;
+
+      if (!hasFreighter) {
+        throw new Error('Freighter wallet extension is not installed. Please install it from https://www.freighter.app/');
+      }
+
+      const accessResult = await requestAccess();
+      let stellarAddress = accessResult?.address;
+
+      if (!stellarAddress && accessResult?.error) {
+        throw new Error(typeof accessResult.error === 'string' ? accessResult.error : 'Freighter connection was rejected.');
+      }
+
+      if (!stellarAddress) {
+        const addrRes = await getAddress();
+        stellarAddress = addrRes?.address;
+      }
+
+      if (!stellarAddress) {
+        throw new Error('Failed to retrieve account from Freighter. Please ensure your wallet is unlocked.');
+      }
+
+      useWalletStore.getState().connect(
+        stellarAddress,
+        role,
+        'freighter',
+        WalletNetwork.STELLAR_TESTNET,
+        'XLM'
+      );
+      return stellarAddress;
+    } catch (err: any) {
+      console.error('Freighter connection error:', err);
+      throw new Error(err?.message || 'Freighter connection failed. Make sure the extension is unlocked.');
+    }
+  }
+
+  // Connects via Simulated Test Profile for instant demo
+  static async connectSimulated(role: 'admin' | 'donor' | 'beneficiary' = 'donor'): Promise<string> {
+    const mockProfiles: Record<'admin' | 'donor' | 'beneficiary', string> = {
+      admin: '0x89205A3A3b2A69De6Dbf7f01ED13B2108B2c43e7',
+      donor: '0x2546BcD3c84621e976D8185a91A922aE77ECEc30',
+      beneficiary: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F'
+    };
+
+    const address = mockProfiles[role];
+    await delay(200);
+    useWalletStore.getState().connect(address, role, 'simulated', WalletNetwork.ARBITRUM_SEPOLIA, 'USDC');
+    return address;
+  }
+
+  // Connects wallet: attempts preferred method or falls back intelligently
+  static async connectWallet(
+    role: 'admin' | 'donor' | 'beneficiary' = 'donor',
+    preferredType?: 'metamask' | 'freighter' | 'simulated'
+  ): Promise<string> {
+    if (preferredType === 'freighter') {
+      return this.connectFreighter(role);
+    }
+    if (preferredType === 'metamask') {
+      return this.connectMetaMask(role);
+    }
+    if (preferredType === 'simulated') {
+      return this.connectSimulated(role);
+    }
+
+    // Default fallback logic: try MetaMask if available, else Freighter, else Simulated
+    if (typeof window !== 'undefined' && (window as any).ethereum) {
+      try {
+        return await this.connectMetaMask(role);
+      } catch (err) {
+        console.warn('MetaMask connection rejected, using simulated profile:', err);
+      }
+    }
+    return this.connectSimulated(role);
   }
 
   // Disconnects active wallet
@@ -84,16 +156,18 @@ export class ArbitrumService {
     useWalletStore.getState().disconnect();
   }
 
-  // Donate USDC to Stylus Treasury on Arbitrum Sepolia
+  // Donate to Treasury
   static async donate(amount: number): Promise<string> {
     const state = useWalletStore.getState();
     const donor = state.publicKey;
     if (!donor) throw new Error('Wallet not connected. Connect your wallet to donate.');
 
+    const currency = state.currency || (state.walletType === 'freighter' ? 'XLM' : 'USDC');
+    const netLabel = state.walletType === 'freighter' ? 'Stellar' : 'Arbitrum Stylus';
     const txId = 'tx_' + Math.random().toString(36).substring(7);
     useTxStore.getState().addTransaction({
       id: txId,
-      title: `Donate ${amount} USDC (Arbitrum Stylus)`,
+      title: `Donate ${amount} ${currency} (${netLabel})`,
       status: 'pending',
       amount: amount.toString()
     });

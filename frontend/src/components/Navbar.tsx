@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useWalletStore } from '../state/wallet';
 import { useTxStore } from '../state/tx';
 import { ArbitrumService } from '../services/arbitrum';
+import { WalletModal } from './WalletModal';
 import { Wallet, Menu, X, Shield, Award, User, RefreshCw, Copy, Check } from 'lucide-react';
 
 export default function Navbar() {
@@ -13,6 +14,7 @@ export default function Navbar() {
   const { publicKey, isConnected, userRole, disconnect, setRole } = useWalletStore();
   const { transactions } = useTxStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [walletModalOpen, setWalletModalOpen] = useState(false);
   const [roleSelectOpen, setRoleSelectOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [menuDropdownOpen, setMenuDropdownOpen] = useState(false);
@@ -169,8 +171,11 @@ export default function Navbar() {
             </label>
           </div>
 
-          <div className="relative flex items-center space-x-3 bg-surface-card border border-hairline rounded-full pl-3.5 pr-2 py-1">
-            <span className="font-sans text-xs font-semibold text-body-text select-none">
+          <div 
+            onClick={() => setWalletModalOpen(true)}
+            className="relative flex items-center space-x-3 bg-surface-card border border-hairline hover:border-hairline-strong rounded-full pl-3.5 pr-2 py-1 cursor-pointer transition-colors group"
+          >
+            <span className="font-sans text-xs font-semibold text-body-text group-hover:text-ink select-none">
               {isConnected ? (
                 <span className="flex items-center">
                   <span className="h-1.5 w-1.5 rounded-full bg-accent-green mr-2 animate-pulse" />
@@ -183,7 +188,8 @@ export default function Navbar() {
 
             {isConnected && (
               <button
-                onClick={async () => {
+                onClick={async (e) => {
+                  e.stopPropagation();
                   if (publicKey) {
                     await navigator.clipboard.writeText(publicKey);
                     setCopied(true);
@@ -206,40 +212,15 @@ export default function Navbar() {
               role="switch"
               className="liquid-3"
               checked={isConnected}
+              onClick={(e) => e.stopPropagation()}
               onChange={() => {
                 if (isConnected) {
                   disconnect();
                 } else {
-                  setRoleSelectOpen(!roleSelectOpen);
+                  setWalletModalOpen(true);
                 }
               }}
             />
-
-            {roleSelectOpen && !isConnected && (
-              <div className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-hairline-strong bg-surface-elevated p-1 shadow-2xl z-50">
-                <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-mute">
-                  Select Test Profile
-                </div>
-                <button
-                  onClick={() => handleConnect('donor')}
-                  className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-medium text-body-text rounded hover:bg-surface-card hover:text-ink"
-                >
-                  Donor Profile
-                </button>
-                <button
-                  onClick={() => handleConnect('admin')}
-                  className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-medium text-body-text rounded hover:bg-surface-card hover:text-ink"
-                >
-                  Charity Admin
-                </button>
-                <button
-                  onClick={() => handleConnect('beneficiary')}
-                  className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-medium text-body-text rounded hover:bg-surface-card hover:text-ink"
-                >
-                  Beneficiary
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -325,7 +306,13 @@ export default function Navbar() {
           })}
 
           <div className="border-t border-hairline pt-4 flex flex-col space-y-3 relative">
-            <div className="flex items-center justify-between">
+            <div 
+              onClick={() => {
+                setWalletModalOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center justify-between p-2 rounded-xl bg-surface-card border border-hairline cursor-pointer"
+            >
               <span className="font-sans text-xs font-semibold text-body-text select-none">
                 {isConnected ? (
                   <span className="flex items-center">
@@ -340,7 +327,8 @@ export default function Navbar() {
               <div className="flex items-center space-x-3">
                 {isConnected && (
                   <button
-                    onClick={async () => {
+                    onClick={async (e) => {
+                      e.stopPropagation();
                       if (publicKey) {
                         await navigator.clipboard.writeText(publicKey);
                         setCopied(true);
@@ -362,11 +350,13 @@ export default function Navbar() {
                   role="switch"
                   className="liquid-3"
                   checked={isConnected}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={() => {
                     if (isConnected) {
                       disconnect();
                     } else {
-                      setRoleSelectOpen(!roleSelectOpen);
+                      setWalletModalOpen(true);
+                      setMobileMenuOpen(false);
                     }
                   }}
                 />
@@ -381,44 +371,15 @@ export default function Navbar() {
                 <span>Role: {userRole.toUpperCase()}</span>
               </div>
             )}
-
-            {roleSelectOpen && !isConnected && (
-              <div className="w-full mt-2 rounded-lg border border-hairline-strong bg-surface-elevated p-1 shadow-2xl z-50">
-                <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-mute border-b border-hairline mb-1 select-none">
-                  Select Test Profile
-                </div>
-                <button
-                  onClick={() => {
-                    handleConnect('donor');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-semibold text-body-text rounded hover:bg-surface-card hover:text-ink"
-                >
-                  Donor Profile
-                </button>
-                <button
-                  onClick={() => {
-                    handleConnect('admin');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-semibold text-body-text rounded hover:bg-surface-card hover:text-ink"
-                >
-                  Charity Admin
-                </button>
-                <button
-                  onClick={() => {
-                    handleConnect('beneficiary');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex w-full items-center px-3 py-2 text-left font-sans text-xs font-semibold text-body-text rounded hover:bg-surface-card hover:text-ink"
-                >
-                  Beneficiary
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
+
+      {/* Wallet Connection Modal */}
+      <WalletModal 
+        isOpen={walletModalOpen} 
+        onClose={() => setWalletModalOpen(false)} 
+      />
     </nav>
   );
 }
