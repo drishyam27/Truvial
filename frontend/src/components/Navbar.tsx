@@ -171,61 +171,62 @@ export default function Navbar() {
             </label>
           </div>
 
-          {/* Desktop Wallet Section */}
-          {!isConnected ? (
-            <button
-              onClick={() => setWalletModalOpen(true)}
-              className="flex items-center space-x-2 px-4 py-2 rounded-full font-sans text-xs font-semibold bg-accent-orange/15 border border-accent-orange/40 text-accent-orange hover:bg-accent-orange hover:text-white shadow-sm hover:shadow-[0_0_15px_rgba(249,115,22,0.35)] transition-all cursor-pointer select-none active:scale-95 group"
-            >
-              <Wallet className="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
-              <span>Connect Wallet</span>
-            </button>
-          ) : (
-            <div className="flex items-center space-x-2">
-              {/* Role & Balance Pill */}
-              <div 
-                onClick={() => setWalletModalOpen(true)}
-                className="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-surface-card border border-hairline hover:border-hairline-strong text-[11px] font-mono cursor-pointer transition-colors"
-                title="Click to manage wallet & role"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-accent-green animate-pulse" />
-                <span className="font-semibold text-ink uppercase">{userRole}</span>
-                <span className="text-hairline-strong">|</span>
-                <span className="text-mute">{balance} USDC</span>
-              </div>
-
-              {/* Address Pill */}
-              <div 
-                onClick={() => setWalletModalOpen(true)}
-                className="flex items-center space-x-2 bg-surface-card hover:bg-surface-elevated border border-hairline hover:border-hairline-strong rounded-full pl-3 pr-1.5 py-1 transition-all cursor-pointer group"
-                title="Manage Account / Disconnect"
-              >
-                <span className="font-mono text-xs font-medium text-body-text group-hover:text-ink select-none flex items-center">
-                  <span className="lg:hidden h-1.5 w-1.5 rounded-full bg-accent-green mr-2 animate-pulse" />
+          {/* Desktop Wallet Section: Capsule with Liquid Toggle Switch */}
+          <div 
+            onClick={() => {
+              if (!isConnected) {
+                setWalletModalOpen(true);
+              }
+            }}
+            className="relative flex items-center space-x-3 bg-surface-card border border-hairline hover:border-hairline-strong rounded-full pl-3.5 pr-2 py-1 cursor-pointer transition-colors group"
+          >
+            <span className="font-sans text-xs font-semibold text-body-text group-hover:text-ink select-none">
+              {isConnected ? (
+                <span className="flex items-center">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent-green mr-2 animate-pulse" />
                   {publicKey?.slice(0, 6)}...{publicKey?.slice(-4)}
                 </span>
+              ) : (
+                "Connect Wallet"
+              )}
+            </span>
 
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    if (publicKey) {
-                      await navigator.clipboard.writeText(publicKey);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 1500);
-                    }
-                  }}
-                  className="flex items-center justify-center p-1 rounded-full text-mute hover:text-ink hover:bg-surface-card transition-all"
-                  title="Copy Address"
-                >
-                  {copied ? (
-                    <Check className="h-3.5 w-3.5 text-accent-green" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5" />
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
+            {isConnected && (
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (publicKey) {
+                    await navigator.clipboard.writeText(publicKey);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 1500);
+                  }
+                }}
+                className="flex items-center justify-center p-1 rounded-full text-mute hover:text-ink hover:bg-surface-elevated transition-all"
+                title="Copy Address"
+              >
+                {copied ? (
+                  <Check className="h-3.5 w-3.5 text-accent-green" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
+              </button>
+            )}
+
+            <input
+              type="checkbox"
+              role="switch"
+              className="liquid-3"
+              checked={isConnected}
+              onClick={(e) => e.stopPropagation()}
+              onChange={() => {
+                if (isConnected) {
+                  disconnect();
+                } else {
+                  setWalletModalOpen(true);
+                }
+              }}
+            />
+          </div>
         </div>
 
         {/* Mobile menu button */}
@@ -310,38 +311,28 @@ export default function Navbar() {
           })}
 
           <div className="border-t border-hairline pt-4 flex flex-col space-y-3 relative">
-            {!isConnected ? (
-              <button
-                onClick={() => {
+            <div 
+              onClick={() => {
+                if (!isConnected) {
                   setWalletModalOpen(true);
                   setMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl font-sans text-xs font-semibold bg-accent-orange/15 border border-accent-orange/40 text-accent-orange hover:bg-accent-orange hover:text-white transition-all shadow-sm active:scale-98"
-              >
-                <Wallet className="h-4 w-4" />
-                <span>Connect Wallet</span>
-              </button>
-            ) : (
-              <div 
-                onClick={() => {
-                  setWalletModalOpen(true);
-                  setMobileMenuOpen(false);
-                }}
-                className="flex items-center justify-between p-3 rounded-xl bg-surface-card border border-hairline hover:border-hairline-strong cursor-pointer"
-              >
-                <div className="flex items-center space-x-2.5">
-                  <span className="h-2 w-2 rounded-full bg-accent-green animate-pulse" />
-                  <div className="flex flex-col">
-                    <span className="font-mono text-xs font-semibold text-ink">
-                      {publicKey?.slice(0, 6)}...{publicKey?.slice(-4)}
-                    </span>
-                    <span className="font-sans text-[11px] text-mute uppercase">
-                      {userRole} • {balance} USDC
-                    </span>
-                  </div>
-                </div>
+                }
+              }}
+              className="flex items-center justify-between p-2 rounded-xl bg-surface-card border border-hairline cursor-pointer"
+            >
+              <span className="font-sans text-xs font-semibold text-body-text select-none">
+                {isConnected ? (
+                  <span className="flex items-center">
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent-green mr-2 animate-pulse" />
+                    {publicKey?.slice(0, 6)}...{publicKey?.slice(-4)}
+                  </span>
+                ) : (
+                  "Connect Wallet"
+                )}
+              </span>
 
-                <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
+                {isConnected && (
                   <button
                     onClick={async (e) => {
                       e.stopPropagation();
@@ -351,14 +342,33 @@ export default function Navbar() {
                         setTimeout(() => setCopied(false), 1500);
                       }
                     }}
-                    className="p-1.5 rounded-lg bg-surface-elevated text-mute hover:text-ink transition-colors"
-                    title="Copy address"
+                    className="flex items-center justify-center p-1 rounded hover:bg-surface-elevated text-mute hover:text-ink transition-all"
                   >
-                    {copied ? <Check className="h-3.5 w-3.5 text-accent-green" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? (
+                      <Check className="h-3.5 w-3.5 text-accent-green" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
                   </button>
-                </div>
+                )}
+
+                <input
+                  type="checkbox"
+                  role="switch"
+                  className="liquid-3"
+                  checked={isConnected}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={() => {
+                    if (isConnected) {
+                      disconnect();
+                    } else {
+                      setWalletModalOpen(true);
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                />
               </div>
-            )}
+            </div>
 
             {isConnected && (
               <div className="flex items-center space-x-1.5 text-[11px] font-sans font-medium text-mute bg-surface-card border border-hairline px-3 py-1.5 rounded-lg select-none">
